@@ -1,0 +1,1577 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hudhud</title>
+<meta name="description" content="Lern-App für Kinder: Arabisch, Koran, deutsches ABC und Zahlen">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#7b4dff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hudhud">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Baloo+Bhaijaan+2:wght@400;600;800&display=swap">
+<style>
+/* Layout: ein bunter Kinder-Garten. Grußzeile, sechs farbige Knöpfe (jede Welt hat ihre Farbe), darunter die aktive Welt. Bewusst ein helles Thema. */
+:root {
+  color-scheme: light;
+  --sky: #e6f5ff;
+  --sky-dot: #cdeaff;
+  --card: #ffffff;
+  --ink: #1d2a4d;
+  --muted: #5b6a8c;
+  --line: #d9e6f5;
+  --sun: #ffc83d;   --sun-soft: #fff1c7;
+  --rose: #ff5c93;  --rose-soft: #ffe0ec;
+  --leaf: #2fbf68;  --leaf-soft: #d8f6e3;
+  --tang: #ff8a2b;  --tang-soft: #ffe6d1;
+  --grape: #8b5cf6; --grape-soft: #ebe2ff;
+  --sea: #129bdb;   --sea-soft: #d6f0fc;
+  --cherry: #e8434f; --cherry-soft: #ffe0e2;
+  --mint: #0fae9c;  --mint-soft: #d3f5f0;
+  --good: #20a35a; --bad: #e5484d;
+  --ui: "Baloo Bhaijaan 2", "Segoe UI", system-ui, sans-serif;
+  --quran: "Amiri Quran", "Amiri", "Traditional Arabic", serif;
+}
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html { background: var(--sky) }
+body { background: radial-gradient(var(--sky-dot) 2px, transparent 2.5px) 0 0 / 28px 28px, var(--sky); color: var(--ink); font-family: var(--ui); font-size: 18px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 56px; min-height: 100% }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 18px }
+button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent }
+button:focus-visible, a:focus-visible { outline: 4px solid var(--sun); outline-offset: 2px }
+[lang="ar"] { direction: rtl }
+
+/* Gruß */
+.hello { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px }
+.hello h1 { margin: 0; font-size: clamp(1.5rem, 5.5vw, 2.2rem); line-height: 1.1; font-weight: 800 }
+.hello h1 [lang="ar"] { display: block; font-size: 1.3em; background: linear-gradient(90deg, var(--rose), var(--tang), var(--sun)); -webkit-background-clip: text; background-clip: text; color: transparent; width: fit-content }
+.stars { display: flex; align-items: center; gap: 8px; background: var(--card); border: 3px solid var(--sun); border-radius: 999px; padding: 4px 18px 4px 6px; font-weight: 800; font-size: 1.5rem; font-variant-numeric: tabular-nums; box-shadow: 0 4px 0 #f0b316 }
+.stars svg { width: 40px; height: 40px }
+.stars small { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); line-height: 1 }
+
+/* Welten-Knöpfe */
+.worlds { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px }
+@media (max-width: 900px) { .worlds { grid-template-columns: repeat(4, 1fr) } }
+@media (max-width: 560px) { .mascot { width: 60px; height: 60px } .bubble { font-size: .95rem } }
+.worlds button { --c: var(--sea); --cs: var(--sea-soft); border: 3px solid transparent; background: var(--card); border-radius: 20px; padding: 6px 4px 8px; display: grid; justify-items: center; gap: 0; line-height: 1.15; font-weight: 800; font-size: .95rem; box-shadow: 0 4px 0 var(--line) }
+.worlds .pic { font-size: 2rem; line-height: 1.3 }
+.worlds [lang="ar"] { font-size: .85rem; font-weight: 600; color: var(--muted) }
+.worlds button[aria-selected="true"] { background: var(--c); color: #fff; box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 70%, #000) }
+.worlds button[aria-selected="true"] [lang="ar"] { color: #fff }
+.c-sun { --c: var(--sun) !important; --cs: var(--sun-soft) !important }
+.c-rose { --c: var(--rose) !important; --cs: var(--rose-soft) !important }
+.c-leaf { --c: var(--leaf) !important; --cs: var(--leaf-soft) !important }
+.c-tang { --c: var(--tang) !important; --cs: var(--tang-soft) !important }
+.c-grape { --c: var(--grape) !important; --cs: var(--grape-soft) !important }
+.c-sea { --c: var(--sea) !important; --cs: var(--sea-soft) !important }
+.c-cherry { --c: var(--cherry) !important; --cs: var(--cherry-soft) !important }
+.c-mint { --c: var(--mint) !important; --cs: var(--mint-soft) !important }
+.worlds .de-sub { font-size: .8rem; font-weight: 600; color: var(--muted) }
+.worlds button[aria-selected="true"] .de-sub { color: #fff }
+.worlds .c-sun[aria-selected="true"] { color: var(--ink) } .worlds .c-sun[aria-selected="true"] [lang="ar"] { color: var(--ink) }
+
+/* Welt */
+.panel { --c: var(--sea); --cs: var(--sea-soft); display: grid; gap: 16px }
+.band { background: var(--c); color: #fff; border-radius: 26px; padding: 12px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap }
+.band.c-sun { color: var(--ink) }
+.band h2 { margin: 0; font-size: 1.6rem; line-height: 1.1 }
+.band h2 [lang="ar"] { font-size: 1.1em; margin-inline-start: 8px; opacity: .9 }
+.band p { margin: 2px 0 0; max-width: 64ch; font-size: .95rem; line-height: 1.4; opacity: .95 }
+.box { background: var(--card); border-radius: 26px; padding: 18px; display: grid; gap: 14px; box-shadow: 0 5px 0 var(--line) }
+.note { font-size: .88rem; color: var(--muted); margin: 0 }
+.say { border: 0; background: var(--c); color: #fff; border-radius: 999px; padding: 8px 18px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 70%, #000) }
+.c-sun .say, .say.c-sun { color: var(--ink) }
+.say svg { width: 20px; height: 20px }
+.say:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--c) 70%, #000) }
+.soft { border: 3px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 16px; font-weight: 800 }
+.soft[aria-pressed="true"] { border-color: var(--c); background: var(--cs) }
+
+/* Buchstaben */
+.letters-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 16px; align-items: start }
+@media (max-width: 760px) { .letters-layout { grid-template-columns: 1fr } .detail { order: -1 } }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; direction: rtl }
+.tile { position: relative; border: 3px solid transparent; border-radius: 18px; padding: 4px 2px 4px; display: grid; justify-items: center; background: var(--card); box-shadow: 0 4px 0 var(--line) }
+.tile:nth-child(6n+1) b { color: var(--rose) } .tile:nth-child(6n+2) b { color: var(--tang) } .tile:nth-child(6n+3) b { color: #d79c00 }
+.tile:nth-child(6n+4) b { color: var(--leaf) } .tile:nth-child(6n+5) b { color: var(--sea) } .tile:nth-child(6n) b { color: var(--grape) }
+.tile b { font-size: 2.5rem; line-height: 1.3; font-weight: 800 }
+.tile span { font-size: .78rem; color: var(--muted); direction: ltr; font-weight: 600 }
+.tile.seen::after { content: "★"; position: absolute; top: 2px; left: 6px; font-size: .85rem; color: var(--sun) }
+.tile[aria-pressed="true"] { border-color: var(--c); background: var(--cs) }
+.detail { position: relative }
+@media (min-width: 761px) { .detail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px) } }
+.big { display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.big .glyph { font-size: 6rem; line-height: 1.05; color: var(--rose); font-weight: 800 }
+.big h3 { margin: 0; font-size: 1.7rem; line-height: 1.1 }
+.big h3 [lang="ar"] { display: block; color: var(--muted); font-size: 1.3rem; font-weight: 600 }
+.big h3 small { display: block; font-size: .95rem; color: var(--muted); font-weight: 600 }
+.forms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; direction: rtl }
+.forms div { background: var(--cs); border-radius: 14px; text-align: center; padding: 2px 2px 6px }
+.forms b { display: block; font-size: 2.1rem; line-height: 1.45; font-weight: 800 }
+.forms small { font-size: .74rem; color: var(--muted); direction: ltr; display: block; font-weight: 600 }
+.word { display: flex; align-items: center; gap: 12px; background: var(--sun-soft); border-radius: 18px; padding: 8px 12px }
+.word .pic { font-size: 2.8rem; line-height: 1 }
+.word [lang="ar"] { font-size: 1.9rem; font-weight: 800; line-height: 1.3 }
+.word p { margin: 0; color: var(--muted); font-weight: 600 }
+.round { margin-inline-start: auto; border: 0; background: var(--card); border-radius: 50%; width: 46px; height: 46px; display: grid; place-items: center; color: var(--c); flex: none }
+.round svg { width: 22px; height: 22px }
+
+/* Vokale */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; direction: rtl }
+.chips button { border: 3px solid var(--line); background: var(--card); border-radius: 14px; min-width: 48px; padding: 0 8px; font-size: 1.5rem; font-weight: 800; line-height: 1.6 }
+.chips button[aria-pressed="true"] { border-color: var(--c); background: var(--c); color: #fff }
+.chips.wide button { font-size: 1rem; direction: ltr; line-height: 2.2 }
+.harakat { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px }
+.hcard { border: 0; border-radius: 24px; padding: 12px 10px; display: grid; justify-items: center; gap: 0; color: var(--ink); box-shadow: 0 5px 0 rgba(29, 42, 77, .12) }
+.hcard:nth-child(1) { background: var(--rose-soft) } .hcard:nth-child(2) { background: var(--sea-soft) }
+.hcard:nth-child(3) { background: var(--leaf-soft) } .hcard:nth-child(4) { background: var(--grape-soft) }
+.hcard b { font-size: 4.6rem; line-height: 1.35; font-weight: 800 }
+.hcard .sound { font-size: 1.7rem; font-weight: 800; line-height: 1.1 }
+.hcard small { color: var(--muted); font-weight: 600 }
+
+/* Nachspuren */
+.trace-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 16px; align-items: start }
+@media (max-width: 760px) { .trace-layout { grid-template-columns: 1fr } }
+.pad { position: relative; width: 100%; max-width: 520px; aspect-ratio: 1; margin: 0 auto; border-radius: 28px; overflow: hidden; background: #fffdf5; box-shadow: inset 0 0 0 4px var(--leaf-soft) }
+.pad canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none }
+.pad svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity .5s }
+.sets { display: flex; flex-wrap: wrap; gap: 6px }
+.sets button { border: 3px solid var(--line); background: var(--card); border-radius: 14px; padding: 2px 14px; font-weight: 800; font-size: 1.2rem }
+.sets button[aria-pressed="true"] { border-color: var(--leaf); background: var(--leaf); color: #fff }
+.chips.ltr { direction: ltr }
+/* Deutsch */
+.abc { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px }
+.abc .tile b { font-size: 2.1rem; letter-spacing: .02em }
+.de-big { display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.de-big .glyph { font-size: 5.6rem; line-height: 1; font-weight: 800; color: var(--cherry) }
+.de-big .glyph small { font-size: .7em; color: var(--sea) }
+.numbers { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px }
+.ncard { border: 0; background: var(--card); border-radius: 20px; padding: 8px 6px 10px; display: grid; justify-items: center; gap: 2px; box-shadow: 0 4px 0 var(--line) }
+.ncard b { font-size: 2.6rem; line-height: 1.1; color: var(--mint) }
+.ncard span { font-weight: 800; line-height: 1.2 }
+.ncard.seen b::after { content: "★"; font-size: .9rem; color: var(--sun); vertical-align: super }
+.tenframe { display: grid; grid-template-columns: repeat(5, 9px); gap: 3px }
+.tenframe i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--line) }
+.tenframe i.on { background: var(--tang); border-color: var(--tang) }
+.count-pics { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: 2.6rem; line-height: 1.2; max-width: 420px; margin: 0 auto }
+.meter { height: 16px; border-radius: 999px; background: var(--leaf-soft); overflow: hidden }
+.meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--sun), var(--leaf)); border-radius: 999px; transition: width .2s }
+.trace-side { display: grid; gap: 12px }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.praise { min-height: 1.6em; margin: 0; font-weight: 800; font-size: 1.3rem; color: var(--good); text-align: center }
+
+/* Wörter */
+.vocab { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px }
+.vcard { border: 0; background: var(--card); border-radius: 22px; padding: 10px 8px 12px; display: grid; justify-items: center; gap: 0; box-shadow: 0 5px 0 var(--line) }
+.vcard .pic { font-size: 3.2rem; line-height: 1.25; height: 4.2rem; display: grid; place-items: center }
+.vcard .swatch { width: 3.4rem; height: 3.4rem; border-radius: 50%; border: 3px solid var(--line) }
+.vcard .digit { font-size: 2.6rem; font-weight: 800; color: var(--tang); line-height: 1 }
+.vcard .digit small { font-size: .55em; color: var(--muted) }
+.vcard [lang="ar"] { font-size: 1.6rem; font-weight: 800; line-height: 1.4; text-align: center }
+.vcard .de { color: var(--muted); font-weight: 600; text-align: center; line-height: 1.2 }
+.vcard.wide { grid-column: span 2 }
+
+/* Spiele */
+.game-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
+.game-pick button { border: 0; border-radius: 24px; padding: 14px; display: flex; gap: 12px; align-items: center; text-align: start; font-weight: 800; font-size: 1.15rem; line-height: 1.2; box-shadow: 0 5px 0 rgba(29, 42, 77, .12) }
+.game-pick button .pic { font-size: 2.6rem }
+.game-pick button small { display: block; font-weight: 600; font-size: .9rem; color: var(--muted) }
+.game-pick button[aria-pressed="true"] { outline: 4px solid var(--grape) }
+.qtop { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--muted); font-weight: 800 }
+.dots { display: flex; gap: 5px }
+.dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--grape-soft) }
+.dots i.ok { background: var(--good) } .dots i.ko { background: var(--bad) } .dots i.now { background: var(--sun) }
+.qprompt { text-align: center; display: grid; gap: 6px; justify-items: center }
+.qprompt .glyph { font-size: 6.5rem; line-height: 1.15; color: var(--grape); font-weight: 800 }
+.qprompt .qword { font-size: 2.6rem; line-height: 1.3; font-weight: 800; color: var(--grape) }
+.qprompt h3 { margin: 0; font-size: 1.35rem; line-height: 1.25 }
+.options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+.options button { border: 3px solid var(--line); background: var(--card); border-radius: 20px; padding: 10px 8px; font-weight: 800; font-size: 1.2rem; line-height: 1.3; box-shadow: 0 4px 0 var(--line) }
+.options button [lang="ar"] { display: block; font-size: 1.05rem; color: var(--muted); font-weight: 600 }
+.options.glyphs button { font-size: 3.2rem; line-height: 1.3 }
+.options.pics button { font-size: 3.4rem; line-height: 1.3 }
+.options .swatch { display: block; width: 3.4rem; height: 3.4rem; margin: 6px auto; border-radius: 50%; border: 3px solid var(--line) }
+.options button.ok { border-color: var(--good); background: #d8f6e3 }
+.options button.ko { border-color: var(--bad); background: #ffe1e1 }
+.options button:disabled { cursor: default }
+.feedback { min-height: 1.6em; text-align: center; font-weight: 800; font-size: 1.3rem; margin: 0 }
+.feedback.ok { color: var(--good) } .feedback.ko { color: var(--bad) }
+.result { text-align: center; display: grid; gap: 6px; justify-items: center }
+.result .score { font-size: 3.6rem; font-weight: 800; color: var(--grape); line-height: 1 }
+.big-btn { border: 0; background: var(--sun); color: var(--ink); border-radius: 999px; padding: 10px 26px; font-weight: 800; font-size: 1.15rem; justify-self: center; box-shadow: 0 5px 0 #e0a800 }
+
+/* Koran */
+.koran-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between }
+.progress-pill { background: var(--card); border-radius: 999px; padding: 4px 16px; font-weight: 800; box-shadow: 0 4px 0 var(--line) }
+.surahs { display: grid; grid-auto-flow: column; grid-auto-columns: 150px; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scroll-snap-type: x proximity }
+.surah { position: relative; border: 3px solid transparent; background: var(--card); border-radius: 22px; padding: 6px 12px 10px; text-align: start; display: grid; box-shadow: 0 4px 0 var(--line); scroll-snap-align: start }
+.surah .no { font-size: .8rem; font-weight: 800; color: var(--muted) }
+.surah [lang="ar"] { font-family: var(--quran); font-size: 1.5rem; line-height: 1.7; color: var(--sea) }
+.surah b { font-size: 1rem; line-height: 1.15 }
+.surah small { color: var(--muted); line-height: 1.2 }
+.surah[aria-pressed="true"] { border-color: var(--sea); background: var(--sea-soft) }
+.surah.done::after { content: "★"; position: absolute; top: 4px; right: 10px; color: var(--sun); font-size: 1.4rem; text-shadow: 0 1px 0 #c58f00 }
+.rhead { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center }
+.rhead h3 { margin: 0; font-size: 1.5rem; line-height: 1.15 }
+.rhead h3 small { display: block; font-size: .95rem; color: var(--muted); font-weight: 600 }
+.basmala { text-align: center; font-family: var(--quran); font-size: 1.8rem; color: var(--sea); margin: 0; line-height: 2 }
+.verses { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none }
+.verse { border-radius: 16px; padding: 6px 12px }
+.verse:nth-child(odd) { background: var(--sea-soft) }
+.verse [lang="ar"] { font-family: var(--quran); font-size: clamp(1.6rem, 5.4vw, 2.2rem); line-height: 2.15; margin: 0; text-align: right }
+.num { color: var(--tang); font-size: .85em; white-space: nowrap }
+.verse .de { margin: 0 0 4px; color: var(--muted); font-size: 1rem; line-height: 1.4 }
+.verse.hidden-v { cursor: pointer }
+.verse.hidden-v .rest { filter: blur(10px); user-select: none }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between }
+.actions a { color: var(--sea); font-weight: 800 }
+.learned { border: 0; border-radius: 999px; padding: 10px 20px; font-weight: 800; background: var(--sun); color: var(--ink); box-shadow: 0 5px 0 #e0a800 }
+.learned[aria-pressed="true"] { background: var(--good); color: #fff; box-shadow: 0 5px 0 #157a42 }
+
+button, a, input { touch-action: manipulation }
+/* Hudhud */
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0 }
+.mascot { width: 76px; height: 76px; flex: none; filter: drop-shadow(0 4px 0 rgba(29,42,77,.12)) }
+.brand .who { display: grid; gap: 0; min-width: 0 }
+.brand .appname { font-weight: 800; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; color: var(--grape) }
+.bubble { position: relative; background: var(--card); border-radius: 18px; padding: 6px 14px; font-weight: 800; box-shadow: 0 4px 0 var(--line); max-width: 30ch; line-height: 1.3 }
+.bubble::before { content: ""; position: absolute; left: -8px; top: 50%; margin-top: -8px; border: 8px solid transparent; border-left: 0; border-right-color: var(--card) }
+.top-right { display: flex; align-items: center; gap: 8px }
+.lock { border: 0; background: var(--card); width: 44px; height: 44px; border-radius: 50%; font-size: 1.2rem; box-shadow: 0 4px 0 var(--line) }
+.playground-btn { border: 0; border-radius: 26px; padding: 12px 18px; display: flex; align-items: center; gap: 14px; text-align: start; color: #fff; font-weight: 800; font-size: 1.25rem; line-height: 1.15;
+  background: linear-gradient(100deg, var(--grape), var(--rose) 60%, var(--tang)); box-shadow: 0 5px 0 #6a3fd0 }
+.playground-btn .pic { font-size: 2.4rem }
+.playground-btn small { display: block; font-size: .95rem; font-weight: 600; opacity: .95 }
+.playground-btn .cost { margin-inline-start: auto; background: rgba(255,255,255,.25); border-radius: 999px; padding: 4px 12px; font-size: 1rem; white-space: nowrap }
+.playground-btn[aria-selected="true"] { outline: 4px solid var(--sun) }
+/* Spielplatz */
+.games { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px }
+.gcard { border: 0; border-radius: 24px; padding: 14px; display: grid; gap: 4px; justify-items: start; text-align: start; box-shadow: 0 5px 0 rgba(29,42,77,.12); color: var(--ink) }
+.gcard .pic { font-size: 3rem; line-height: 1.1 }
+.gcard b { font-size: 1.25rem; line-height: 1.15 }
+.gcard small { color: var(--muted); font-weight: 600; line-height: 1.3 }
+.gcard .price { margin-top: 6px; background: var(--card); border-radius: 999px; padding: 2px 12px; font-weight: 800 }
+.gcard:disabled { opacity: .55; cursor: not-allowed }
+.stage { position: relative; height: min(64vh, 480px); border-radius: 24px; overflow: hidden; background: linear-gradient(#bfe6ff, #e9f7ff 70%, #c8f0d4); touch-action: manipulation; user-select: none }
+.stage .hud { position: absolute; inset: 10px 10px auto; display: flex; justify-content: space-between; gap: 8px; font-weight: 800; z-index: 2; pointer-events: none }
+.stage .hud span { background: rgba(255,255,255,.85); border-radius: 999px; padding: 2px 12px }
+.balloon { position: absolute; width: 74px; height: 92px; border: 0; padding: 0; background: none; z-index: 1 }
+.balloon .b { position: absolute; inset: 0 0 18px; border-radius: 50% 50% 46% 46%; display: grid; place-items: center; font-size: 2.2rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.2); box-shadow: inset -8px -10px 0 rgba(0,0,0,.1) }
+.balloon .s { position: absolute; left: 50%; bottom: 0; width: 2px; height: 20px; background: rgba(29,42,77,.35) }
+.pop-fx { position: absolute; font-size: 2rem; pointer-events: none; animation: fx .5s ease forwards }
+@keyframes fx { to { transform: scale(1.8); opacity: 0 } }
+.memory { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 520px; margin: 0 auto; width: 100% }
+.mcard { aspect-ratio: 3 / 4; border: 0; border-radius: 16px; font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, var(--grape), var(--rose)); color: transparent; box-shadow: 0 4px 0 rgba(29,42,77,.15); max-width: 100% }
+.mcard.open, .mcard.found { background: var(--card); color: var(--ink) }
+.mcard.found { background: var(--leaf-soft) }
+.album { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px }
+.sticker { aspect-ratio: 1; border-radius: 20px; display: grid; place-items: center; font-size: 2.6rem; background: var(--card); box-shadow: 0 4px 0 var(--line); max-width: 100% }
+.sticker.locked { background: var(--grape-soft); color: var(--grape); font-size: 1.6rem; font-weight: 800 }
+.sticker.new { animation: pop .6s ease 2 }
+/* Pause und Eltern */
+.overlay { position: fixed; inset: 0; z-index: 40; background: rgba(29,42,77,.55); display: grid; place-items: center; padding: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.sheet { background: var(--card); border-radius: 28px; padding: 22px; width: min(560px, 100%); max-height: 100%; overflow: auto; display: grid; gap: 14px }
+.sheet h2 { margin: 0; font-size: 1.5rem; line-height: 1.2 }
+.sheet p { margin: 0 }
+.sleep { text-align: center; justify-items: center }
+.sleep svg { width: 140px; height: 140px }
+.sheet input { font: inherit; font-size: 1.4rem; width: 8ch; padding: 6px 10px; border: 3px solid var(--line); border-radius: 14px }
+.sheet h3 { margin: 6px 0 0; font-size: 1.1rem }
+.sheet ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: .95rem }
+.sheet a { color: var(--sea); font-weight: 600 }
+.limits { display: flex; flex-wrap: wrap; gap: 6px }
+.usage { font-variant-numeric: tabular-nums; font-weight: 800 }
+.play { border: 0; background: var(--sea-soft); color: var(--sea); width: 40px; height: 40px; border-radius: 50%; display: inline-grid; place-items: center; vertical-align: middle; flex: none }
+.play svg { width: 18px; height: 18px }
+.verse.playing { outline: 3px solid var(--sun); background: var(--sun-soft) !important }
+.vrow { display: flex; gap: 8px; align-items: flex-start }
+.vrow > div { flex: 1; min-width: 0 }
+/* Tagesmission */
+.mission { background: var(--card); border-radius: 24px; padding: 12px 16px; display: grid; gap: 8px; box-shadow: 0 5px 0 var(--line); border: 3px solid var(--sun) }
+.mission-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px }
+.mission-head b { font-size: 1.2rem }
+.mission-head span { font-weight: 600; color: var(--muted); font-size: .95rem }
+.tasks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+@media (max-width: 640px) { .tasks { grid-template-columns: 1fr } }
+.task { border: 0; border-radius: 16px; background: var(--sun-soft); padding: 8px 10px; display: flex; align-items: center; gap: 10px; text-align: start; font-weight: 600; line-height: 1.25; min-width: 0 }
+.task .box2 { width: 30px; height: 30px; border-radius: 10px; border: 3px solid #e0a800; display: grid; place-items: center; flex: none; font-weight: 800; background: var(--card) }
+.task.done { background: var(--leaf-soft) }
+.task.done .box2 { background: var(--leaf); border-color: var(--leaf); color: #fff }
+.task small { display: block; color: var(--muted); font-weight: 600 }
+/* Koran Schritt für Schritt */
+.steps { background: var(--sun-soft); border-radius: 20px; padding: 12px 14px; display: grid; gap: 10px }
+.steps h4 { margin: 0; font-size: 1.15rem }
+.steps p { margin: 0; color: var(--muted); font-weight: 600 }
+.steps .bar { height: 12px; border-radius: 999px; background: var(--card); overflow: hidden }
+.steps .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--sun), var(--leaf)); border-radius: 999px }
+.verse.current { outline: 3px solid var(--leaf); background: var(--leaf-soft) !important }
+/* Bewegungspause */
+.break-count { font-size: 3rem; font-weight: 800; color: var(--grape); line-height: 1; font-variant-numeric: tabular-nums }
+.welcome input, .sheet textarea { font: inherit; font-size: 1.15rem; width: 100%; padding: 8px 12px; border: 3px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink) }
+.sheet textarea { font-size: .8rem; min-height: 5em; font-family: ui-monospace, monospace }
+.field { display: grid; gap: 4px; font-weight: 600 }
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tile, .hcard, .options button, .surah, .vcard, .worlds button { transition: transform .12s ease }
+  .tile:active, .hcard:active, .options button:active, .surah:active, .vcard:active, .worlds button:active { transform: scale(.94) }
+  .pop { animation: pop .4s ease }
+  @keyframes pop { 40% { transform: scale(1.18) rotate(-4deg) } }
+  .wiggle { animation: wiggle .5s ease }
+  @keyframes wiggle { 25% { transform: rotate(-6deg) } 75% { transform: rotate(6deg) } }
+}
+</style>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="hello">
+    <div class="brand">
+      <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">  <g transform="translate(56 40)">
+    <g fill="#ff9d3a" stroke="#7a3b10" stroke-width="1.2">
+      <path d="M0 0 C-6 -10 -16 -20 -26 -22 C-24 -14 -14 -4 0 0Z"/>
+      <path d="M0 0 C-4 -12 -8 -26 -14 -32 C-18 -24 -10 -8 0 0Z"/>
+      <path d="M0 0 C0 -14 2 -28 0 -36 C-6 -28 -4 -10 0 0Z"/>
+      <path d="M0 0 C4 -12 10 -24 14 -30 C6 -26 2 -10 0 0Z"/>
+    </g>
+    <g fill="#2a1a12">
+      <path d="M-26 -22 C-24 -19 -21 -17 -19 -17 C-21 -19 -23 -21 -26 -22Z"/>
+      <circle cx="-13.5" cy="-30" r="2.6"/><circle cx="-0.5" cy="-34" r="2.6"/><circle cx="13" cy="-28.5" r="2.6"/><circle cx="-23" cy="-20.5" r="2.4"/>
+    </g>
+  </g>
+  <path d="M92 74 C104 78 112 90 114 100 C104 98 94 90 88 82Z" fill="#2a1a12"/>
+  <path d="M96 84 L108 94 M93 79 L106 88" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="66" cy="78" rx="31" ry="25" fill="#f6a65b"/>
+  <ellipse cx="60" cy="86" rx="20" ry="14" fill="#fcd9a8"/>
+  <path d="M66 64 C84 60 98 70 98 84 C90 92 76 92 66 86 C70 78 70 70 66 64Z" fill="#2a1a12"/>
+  <path d="M72 68 C80 70 88 74 93 80 M70 75 C78 77 86 81 90 86 M70 82 C76 84 82 86 86 88" stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <circle cx="54" cy="50" r="19" fill="#f8b26a"/>
+  <path d="M38 55 C26 58 14 64 6 72 C16 68 28 62 39 60Z" fill="#3b2a20"/>
+  <circle cx="51" cy="47" r="7.5" fill="#fff"/>
+  <circle cx="49.5" cy="47.5" r="4.6" fill="#1d1d2b"/>
+  <circle cx="48" cy="45.6" r="1.6" fill="#fff"/>
+  <ellipse cx="60" cy="56" rx="4" ry="2.6" fill="#ff7f9e" opacity=".7"/>
+  <path d="M58 101 L56 112 M70 101 L72 112" stroke="#3b2a20" stroke-width="3" stroke-linecap="round"/>
+  <path d="M51 112 L60 112 M67 112 L77 112" stroke="#3b2a20" stroke-width="3" stroke-linecap="round"/>
+</svg>
+      <div class="who">
+        <span class="appname">Hudhud</span>
+        <h1><span lang="ar" id="helloAr">أَهْلًا!</span><span id="helloDe">Hallo!</span></h1>
+      </div>
+    </div>
+    <div class="top-right">
+    <button class="lock" id="parentBtn" aria-label="Elternbereich">🔒</button>
+    <div class="stars" id="stars" aria-live="polite">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffc83d" stroke="#e0a800" stroke-width="1.2" stroke-linejoin="round" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>
+      <div><span id="starCount">0</span><small>Sterne</small></div>
+    </div>
+    </div>
+  </header>
+  <p class="bubble" id="bubble" aria-live="polite">Salām! Ich bin Hudhud. Sammle Sterne, dann darfst du spielen!</p>
+  <section class="mission" id="mission" aria-label="Mission des Tages"></section>
+
+  <nav class="worlds" role="tablist" aria-label="Welten">
+    <button role="tab" id="tab-buchstaben" data-tab="buchstaben" class="c-sun"><span class="pic" aria-hidden="true">🔤</span>Buchstaben<span lang="ar">الحُرُوف</span></button>
+    <button role="tab" id="tab-vokale" data-tab="vokale" class="c-rose"><span class="pic" aria-hidden="true">🎵</span>Vokale<span lang="ar">الحَرَكَات</span></button>
+    <button role="tab" id="tab-spuren" data-tab="spuren" class="c-leaf"><span class="pic" aria-hidden="true">✏️</span>Schreiben<span lang="ar">الكِتَابَة</span></button>
+    <button role="tab" id="tab-woerter" data-tab="woerter" class="c-tang"><span class="pic" aria-hidden="true">🦁</span>Wörter<span lang="ar">الكَلِمَات</span></button>
+    <button role="tab" id="tab-spiele" data-tab="spiele" class="c-grape"><span class="pic" aria-hidden="true">🧠</span>Quiz<span lang="ar">التَّمَارِين</span></button>
+    <button role="tab" id="tab-koran" data-tab="koran" class="c-sea"><span class="pic" aria-hidden="true">📖</span>Koran<span lang="ar">القُرْآن</span></button>
+    <button role="tab" id="tab-abc" data-tab="abc" class="c-cherry"><span class="pic" aria-hidden="true">🔠</span>ABC<span class="de-sub">Deutsch</span></button>
+    <button role="tab" id="tab-zahlen" data-tab="zahlen" class="c-mint"><span class="pic" aria-hidden="true">🔢</span>Zahlen<span class="de-sub">Deutsch</span></button>
+  </nav>
+  <button class="playground-btn" role="tab" id="tab-spielplatz" data-tab="spielplatz"><span class="pic" aria-hidden="true">🎪</span><span>Spielplatz<small>Tausche deine Sterne gegen Spiele und Sticker</small></span><span class="cost">ab 5 ⭐</span></button>
+
+  <!-- BUCHSTABEN -->
+  <section class="panel c-sun" id="p-buchstaben" role="tabpanel" aria-labelledby="tab-buchstaben">
+    <div class="band c-sun"><div><h2>Die 28 Buchstaben <span lang="ar">الحُرُوف</span></h2>
+      <p>Arabisch liest man von rechts nach links. Tippe auf einen Buchstaben, dann hörst du ihn. Jeder neue Buchstabe schenkt dir einen Stern.</p></div></div>
+    <div class="letters-layout">
+      <div class="grid" id="letterGrid"></div>
+      <aside class="box detail" id="detail" aria-live="polite"></aside>
+    </div>
+    <p class="note" id="voiceNote" hidden>Auf diesem Gerät ist keine arabische Stimme installiert, deshalb kann der Ton fehlen. Auf dem iPhone: Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen › Arabisch. Auf Android: Einstellungen › Text-in-Sprache › Sprachdaten installieren › Arabisch.</p>
+  </section>
+
+  <!-- VOKALE -->
+  <section class="panel c-rose" id="p-vokale" role="tabpanel" aria-labelledby="tab-vokale" hidden>
+    <div class="band c-rose"><div><h2>Die kleinen Vokale <span lang="ar">الحَرَكَات</span></h2>
+      <p>Kleine Zeichen sitzen auf dem Buchstaben. Fatḥa oben macht „a“, Kasra unten macht „i“, Ḍamma macht „u“, und Sukūn macht eine Pause. Wähle einen Buchstaben.</p></div></div>
+    <div class="box">
+      <div class="chips" id="harakaChips"></div>
+      <div class="harakat" id="harakat"></div>
+    </div>
+  </section>
+
+  <!-- NACHSPUREN -->
+  <section class="panel c-leaf" id="p-spuren" role="tabpanel" aria-labelledby="tab-spuren" hidden>
+    <div class="band c-leaf"><div><h2>Schreiben mit dem Finger <span lang="ar">الكِتَابَة</span></h2>
+      <p>Schau zuerst zu, wie Hudhud schreibt. Dann fährst du mit dem Finger nach, beim grünen Punkt geht es los. Vergiss die Punkte nicht!</p></div></div>
+    <div class="trace-layout">
+      <div class="box">
+        <div class="pad" id="pad"><canvas id="guide"></canvas><canvas id="ink" aria-label="Schreibfläche"></canvas><svg id="demo" viewBox="0 0 100 100" aria-hidden="true"></svg></div>
+        <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+        <p class="praise" id="praise" aria-live="polite"></p>
+      </div>
+      <div class="box trace-side">
+        <div class="sets" id="traceSets"></div>
+        <div class="row">
+          <button class="say" id="traceShow">▶ Zeig mir wie</button>
+          <button class="say" id="traceSay"></button>
+          <button class="soft" id="traceClear">Neu anfangen</button>
+          <button class="soft" id="traceNext">Weiter ›</button>
+        </div>
+        <p class="note" id="traceCount"></p>
+        <div class="chips" id="traceChips"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WÖRTER -->
+  <section class="panel c-tang" id="p-woerter" role="tabpanel" aria-labelledby="tab-woerter" hidden>
+    <div class="band c-tang"><div><h2>Meine ersten Wörter <span lang="ar">الكَلِمَات</span></h2>
+      <p>Wähle ein Thema und tippe auf ein Bild, dann hörst du das Wort auf Arabisch.</p></div></div>
+    <div class="chips wide" id="themeChips"></div>
+    <div class="vocab" id="vocab"></div>
+  </section>
+
+  <!-- SPIELE -->
+  <section class="panel c-grape" id="p-spiele" role="tabpanel" aria-labelledby="tab-spiele" hidden>
+    <div class="band c-grape"><div><h2>Quiz <span lang="ar">التَّمَارِين</span></h2>
+      <p>10 Fragen pro Runde. Jede richtige Antwort schenkt dir einen Stern. Mit den Sternen spielst du auf dem Spielplatz.</p></div></div>
+    <div class="game-pick">
+      <button id="gLetters" style="background:var(--sun-soft)"><span class="pic" aria-hidden="true">🔤</span><span>Buchstaben-Spiel<small>Wie heißt der Buchstabe?</small></span></button>
+      <button id="gWords" style="background:var(--tang-soft)"><span class="pic" aria-hidden="true">🦁</span><span>Wörter-Spiel<small>Hör zu und finde das Bild</small></span></button>
+    </div>
+    <div class="box" id="quiz"></div>
+  </section>
+
+  <!-- KORAN -->
+  <section class="panel c-sea" id="p-koran" role="tabpanel" aria-labelledby="tab-koran" hidden>
+    <div class="band c-sea"><div><h2>Mein Koran: Juz' ʿAmma <span lang="ar">جُزْء عَمَّ</span></h2>
+      <p>Al-Fātiḥa und alle 37 Suren von An-Nās bis An-Nabaʾ. Lies und höre die Sure. Mit „🧠 Schritt für Schritt“ lernst du sie Vers für Vers auswendig, wie in der Koranschule.</p></div></div>
+    <div class="koran-top">
+      <span class="progress-pill" id="koranProgress"></span>
+    </div>
+    <div class="surahs" id="surahList"></div>
+    <article class="box" id="reader"></article>
+    <p class="note">Arabischer Text: Hafs-Lesart nach dem King-Fahd-Komplex (Medina). Deutsche Bedeutung: Frank Bubenheim und Nadeem Elyas. Bitte immer mit einem Mushaf und einem Lehrer vergleichen.</p>
+  </section>
+  <!-- ABC -->
+  <section class="panel c-cherry" id="p-abc" role="tabpanel" aria-labelledby="tab-abc" hidden>
+    <div class="band c-cherry"><div><h2>Das deutsche ABC</h2>
+      <p>Tippe auf einen Buchstaben: du hörst ihn und ein Wort, das damit anfängt. Danach kannst du ihn groß und klein schreiben.</p></div></div>
+    <div class="letters-layout">
+      <div class="abc" id="abcGrid"></div>
+      <aside class="box detail" id="abcDetail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- ZAHLEN -->
+  <section class="panel c-mint" id="p-zahlen" role="tabpanel" aria-labelledby="tab-zahlen" hidden>
+    <div class="band c-mint"><div><h2>Zahlen auf Deutsch</h2>
+      <p>Tippe auf eine Zahl und höre sie. Beim Zählspiel zählst du die Bilder und bekommst Sterne.</p></div></div>
+    <div class="box" id="countBox"></div>
+    <div class="numbers" id="numGrid"></div>
+  </section>
+
+  <!-- SPIELPLATZ -->
+  <section class="panel c-grape" id="p-spielplatz" role="tabpanel" aria-labelledby="tab-spielplatz" hidden>
+    <div class="band c-grape"><div><h2>Spielplatz <span lang="ar">المَلْعَب</span></h2>
+      <p>Hier bezahlst du mit deinen Sternen. Lernen bringt Sterne, Spielen kostet Sterne.</p></div></div>
+    <div class="games" id="gameCards"></div>
+    <div class="box" id="gameBox" hidden></div>
+  </section>
+</div>
+
+<div class="overlay" id="sleepOverlay" hidden>
+  <div class="sheet sleep">
+    <svg viewBox="0 0 120 120" aria-hidden="true">  <g transform="translate(56 40)">
+    <g fill="#ff9d3a" stroke="#7a3b10" stroke-width="1.2">
+      <path d="M0 0 C-6 -10 -16 -20 -26 -22 C-24 -14 -14 -4 0 0Z"/>
+      <path d="M0 0 C-4 -12 -8 -26 -14 -32 C-18 -24 -10 -8 0 0Z"/>
+      <path d="M0 0 C0 -14 2 -28 0 -36 C-6 -28 -4 -10 0 0Z"/>
+      <path d="M0 0 C4 -12 10 -24 14 -30 C6 -26 2 -10 0 0Z"/>
+    </g>
+    <g fill="#2a1a12">
+      <path d="M-26 -22 C-24 -19 -21 -17 -19 -17 C-21 -19 -23 -21 -26 -22Z"/>
+      <circle cx="-13.5" cy="-30" r="2.6"/><circle cx="-0.5" cy="-34" r="2.6"/><circle cx="13" cy="-28.5" r="2.6"/><circle cx="-23" cy="-20.5" r="2.4"/>
+    </g>
+  </g>
+  <path d="M92 74 C104 78 112 90 114 100 C104 98 94 90 88 82Z" fill="#2a1a12"/>
+  <path d="M96 84 L108 94 M93 79 L106 88" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="66" cy="78" rx="31" ry="25" fill="#f6a65b"/>
+  <ellipse cx="60" cy="86" rx="20" ry="14" fill="#fcd9a8"/>
+  <path d="M66 64 C84 60 98 70 98 84 C90 92 76 92 66 86 C70 78 70 70 66 64Z" fill="#2a1a12"/>
+  <path d="M72 68 C80 70 88 74 93 80 M70 75 C78 77 86 81 90 86 M70 82 C76 84 82 86 86 88" stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <circle cx="54" cy="50" r="19" fill="#f8b26a"/>
+  <path d="M38 55 C26 58 14 64 6 72 C16 68 28 62 39 60Z" fill="#3b2a20"/>
+  <circle cx="51" cy="47" r="7.5" fill="#fff"/>
+  <circle cx="49.5" cy="47.5" r="4.6" fill="#1d1d2b"/>
+  <circle cx="48" cy="45.6" r="1.6" fill="#fff"/>
+  <ellipse cx="60" cy="56" rx="4" ry="2.6" fill="#ff7f9e" opacity=".7"/>
+  <path d="M58 101 L56 112 M70 101 L72 112" stroke="#3b2a20" stroke-width="3" stroke-linecap="round"/>
+  <path d="M51 112 L60 112 M67 112 L77 112" stroke="#3b2a20" stroke-width="3" stroke-linecap="round"/>
+</svg>
+    <h2>Hudhud ist müde 😴</h2>
+    <p>Für heute ist Schluss. Du hast toll gelernt! Morgen geht es weiter. Jetzt kannst du draußen spielen, malen oder mit Mama und Papa lesen.</p>
+    <button class="soft" id="sleepParent">🔒 Eltern</button>
+  </div>
+</div>
+
+<div class="overlay" id="breakOverlay" hidden>
+  <div class="sheet sleep">
+    <h2>Bewegungspause! 🐦</h2>
+    <p>Steh auf und flieg wie Hudhud: Arme ausbreiten und 10 Mal flattern. Dann 5 Mal hüpfen!</p>
+    <div class="break-count" id="breakCount">20</div>
+    <button class="big-btn" id="breakDone" disabled>Weiter lernen</button>
+  </div>
+</div>
+
+<div class="overlay" id="welcomeOverlay" hidden>
+  <form class="sheet welcome" id="welcomeForm" lang="fr">
+    <h2>Bienvenue dans Hudhud 🐦</h2>
+    <p>Cette application aide un enfant à apprendre l'arabe, le Coran (Juz' ʿAmma), l'alphabet et les nombres en allemand. L'interface pour l'enfant est en allemand.</p>
+    <label class="field" for="nameIn">Prénom de l'enfant
+      <input id="nameIn" autocomplete="off" required placeholder="Prénom"></label>
+    <label class="field" for="arNameIn">Son prénom en lettres arabes (facultatif, pour apprendre à l'écrire)
+      <input id="arNameIn" autocomplete="off" lang="ar" dir="rtl" placeholder="مثال: آدم"></label>
+    <p class="note">Le prénom et tous les progrès restent uniquement sur cet appareil. Rien n'est envoyé sur Internet.</p>
+    <button class="big-btn">Commencer</button>
+  </form>
+</div>
+
+<div class="overlay" id="parentOverlay" hidden>
+  <div class="sheet" id="parentSheet" lang="fr"></div>
+</div>
+
+<script>
+const QURAN = [{"n":1,"ar":"الفَاتِحَة","tr":"Al-Fātiḥa","de":"Die Eröffnende","v":[["بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ","Im Namen Allahs, des Allerbarmers, des Barmherzigen"],["ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ","(Alles) Lob gehört Allah, dem Herrn der Welten"],["ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ","dem Allerbarmer, dem Barmherzigen"],["مَٰلِكِ يَوۡمِ ٱلدِّينِ","dem Herrscher am Tag des Gerichts"],["إِيَّاكَ نَعۡبُدُ وَإِيَّاكَ نَسۡتَعِينُ","Dir allein dienen wir, und zu Dir allein flehen wir um Hilfe"],["ٱهۡدِنَا ٱلصِّرَٰطَ ٱلۡمُسۡتَقِيمَ","Leite uns den geraden Weg"],["صِرَٰطَ ٱلَّذِينَ أَنۡعَمۡتَ عَلَيۡهِمۡ غَيۡرِ ٱلۡمَغۡضُوبِ عَلَيۡهِمۡ وَلَا ٱلضَّآلِّينَ","den Weg derjenigen, denen Du Gunst erwiesen hast, nicht derjenigen, die (Deinen) Zorn erregt haben, und nicht der Irregehenden"]]},{"n":114,"ar":"النَّاس","tr":"An-Nās","de":"Die Menschen","v":[["قُلۡ أَعُوذُ بِرَبِّ ٱلنَّاسِ","Sag: Ich nehme Zuflucht beim Herrn der Menschen"],["مَلِكِ ٱلنَّاسِ","dem König der Menschen"],["إِلَٰهِ ٱلنَّاسِ","dem Gott der Menschen"],["مِن شَرِّ ٱلۡوَسۡوَاسِ ٱلۡخَنَّاسِ","vor dem Übel des Einflüsterers, des Davonschleichers"],["ٱلَّذِي يُوَسۡوِسُ فِي صُدُورِ ٱلنَّاسِ","der in die Brüste der Menschen einflüstert"],["مِنَ ٱلۡجِنَّةِ وَٱلنَّاسِ","von den Ginn und den Menschen"]]},{"n":113,"ar":"الفَلَق","tr":"Al-Falaq","de":"Das Frühlicht","v":[["قُلۡ أَعُوذُ بِرَبِّ ٱلۡفَلَقِ","Sag: Ich nehme Zuflucht beim Herrn des Tagesanbruchs"],["مِن شَرِّ مَا خَلَقَ","vor dem Übel dessen, was Er erschaffen hat"],["وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ","und vor dem Übel der Dunkelheit, wenn sie zunimmt"],["وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِي ٱلۡعُقَدِ","und vor dem Übel der Knotenanbläserinnen"],["وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ","und vor dem Übel eines (jeden) Neidenden, wenn er neidet"]]},{"n":112,"ar":"الإِخْلَاص","tr":"Al-Ikhlāṣ","de":"Die Aufrichtigkeit","v":[["قُلۡ هُوَ ٱللَّهُ أَحَدٌ","Sag: Er ist Allah, Einer"],["ٱللَّهُ ٱلصَّمَدُ","Allah, der Überlegene"],["لَمۡ يَلِدۡ وَلَمۡ يُولَدۡ","Er hat nicht gezeugt und ist nicht gezeugt worden"],["وَلَمۡ يَكُن لَّهُۥ كُفُوًا أَحَدُۢ","und niemand ist Ihm jemals gleich"]]},{"n":111,"ar":"المَسَد","tr":"Al-Masad","de":"Die Palmfasern","v":[["تَبَّتۡ يَدَآ أَبِي لَهَبࣲ وَتَبَّ","Zugrunde gehen sollen die Hände Abu Lahabs, und zugrunde gehen soll er (selbst)"],["مَآ أَغۡنَىٰ عَنۡهُ مَالُهُۥ وَمَا كَسَبَ","Was nützt ihm sein Besitz und das, was er erworben hat"],["سَيَصۡلَىٰ نَارࣰ ا ذَاتَ لَهَبࣲ","Er wird einem Feuer voller Flammen ausgesetzt sein"],["وَٱمۡرَأَتُهُۥ حَمَّالَةَ ٱلۡحَطَبِ","und (auch) seine Frau, die Brennholzträgerin"],["فِي جِيدِهَا حَبۡلࣱ مِّن مَّسَدِۭ","Um ihrem Hals ist ein Strick aus Palmfasern"]]},{"n":110,"ar":"النَّصْر","tr":"An-Naṣr","de":"Die Hilfe","v":[["إِذَا جَآءَ نَصۡرُ ٱللَّهِ وَٱلۡفَتۡحُ","Wenn Allahs Hilfe kommt und der Sieg"],["وَرَأَيۡتَ ٱلنَّاسَ يَدۡخُلُونَ فِي دِينِ ٱللَّهِ أَفۡوَاجࣰ ا","und du die Menschen in Allahs Religion in Scharen eintreten siehst"],["فَسَبِّحۡ بِحَمۡدِ رَبِّكَ وَٱسۡتَغۡفِرۡهُۚ إِنَّهُۥ كَانَ تَوَّابَۢا","dann lobpreise deinen Herrn und bitte Ihn um Vergebung; gewiß, Er ist Reue-Annehmend"]]},{"n":109,"ar":"الكَافِرُون","tr":"Al-Kāfirūn","de":"Die Ungläubigen","v":[["قُلۡ يَٰٓأَيُّهَا ٱلۡكَٰفِرُونَ","Sag: O ihr Ungläubigen"],["لَآ أَعۡبُدُ مَا تَعۡبُدُونَ","ich diene nicht dem, dem ihr dient"],["وَلَآ أَنتُمۡ عَٰبِدُونَ مَآ أَعۡبُدُ","und ihr dient nicht Dem, Dem ich diene"],["وَلَآ أَنَا۠ عَابِدࣱ مَّا عَبَدتُّمۡ","Und ich werde (auch) nicht dem dienen, dem ihr gedient habt"],["وَلَآ أَنتُمۡ عَٰبِدُونَ مَآ أَعۡبُدُ","Und ihr werdet nicht Dem dienen, Dem ich diene"],["لَكُمۡ دِينُكُمۡ وَلِيَ دِينِ","Euch eure Religion und mir meine Religion"]]},{"n":108,"ar":"الكَوْثَر","tr":"Al-Kauthar","de":"Die Fülle","v":[["إِنَّآ أَعۡطَيۡنَٰكَ ٱلۡكَوۡثَرَ","Wir haben dir ja al-Kautar gegeben"],["فَصَلِّ لِرَبِّكَ وَٱنۡحَرۡ","So bete zu deinem Herrn und opfere"],["إِنَّ شَانِئَكَ هُوَ ٱلۡأَبۡتَرُ","Gewiß, derjenige, der dich haßt, - er ist vom Guten abgetrennt"]]},{"n":107,"ar":"المَاعُون","tr":"Al-Māʿūn","de":"Die Hilfeleistung","v":[["أَرَءَيۡتَ ٱلَّذِي يُكَذِّبُ بِٱلدِّينِ","Siehst du (nicht) denjenigen, der das Gericht für Lüge erklärt"],["فَذَٰلِكَ ٱلَّذِي يَدُعُّ ٱلۡيَتِيمَ","Das ist derjenige, der die Waise zurückstößt"],["وَلَا يَحُضُّ عَلَىٰ طَعَامِ ٱلۡمِسۡكِينِ","und nicht zur Speisung des Armen anhält"],["فَوَيۡلࣱ لِّلۡمُصَلِّينَ","Wehe nun den Betenden"],["ٱلَّذِينَ هُمۡ عَن صَلَاتِهِمۡ سَاهُونَ","denjenigen, die auf ihre Gebete nicht achten"],["ٱلَّذِينَ هُمۡ يُرَآءُونَ","denjenigen, die dabei (nur) gesehen werden wollen"],["وَيَمۡنَعُونَ ٱلۡمَاعُونَ","und die Hilfeleistung verweigern"]]},{"n":106,"ar":"قُرَيْش","tr":"Quraisch","de":"Quraisch","v":[["لِإِيلَٰفِ قُرَيۡشٍ","Für die Vereinigung der Qurais"],["إِۦلَٰفِهِمۡ رِحۡلَةَ ٱلشِّتَآءِ وَٱلصَّيۡفِ","ihre Vereinigung während der Reise des Winters und des Sommers"],["فَلۡيَعۡبُدُواْ رَبَّ هَٰذَا ٱلۡبَيۡتِ","So sollen sie dem Herrn dieses Hauses dienen"],["ٱلَّذِيٓ أَطۡعَمَهُم مِّن جُوعࣲ وَءَامَنَهُم مِّنۡ خَوۡفِۭ","Der ihnen Speise nach ihrem Hunger gegeben und ihnen Sicherheit nach ihrer Furcht gewährt hat"]]},{"n":105,"ar":"الفِيل","tr":"Al-Fīl","de":"Der Elefant","v":[["أَلَمۡ تَرَ كَيۡفَ فَعَلَ رَبُّكَ بِأَصۡحَٰبِ ٱلۡفِيلِ","Siehst du nicht, wie dein Herr mit den Leuten des Elefanten verfuhr"],["أَلَمۡ يَجۡعَلۡ كَيۡدَهُمۡ فِي تَضۡلِيلࣲ","Ließ Er nicht ihre List verlorengehen"],["وَأَرۡسَلَ عَلَيۡهِمۡ طَيۡرًا أَبَابِيلَ","und sandte gegen sie Vögel in aufeinanderfolgenden Schwärmen"],["تَرۡمِيهِم بِحِجَارَةࣲ مِّن سِجِّيلࣲ","die sie mit Steinen aus gebranntem Lehm bewarfen"],["فَجَعَلَهُمۡ كَعَصۡفࣲ مَّأۡكُولِۭ","und sie so wie abgefressene Halme machte"]]},{"n":104,"ar":"الهُمَزَة","tr":"Al-Humaza","de":"Der Stichler","v":[["وَيۡلࣱ لِّكُلِّ هُمَزَةࣲ لُّمَزَةٍ","Wehe jedem Stichler und Nörgler"],["ٱلَّذِي جَمَعَ مَالࣰ ا وَعَدَّدَهُۥ","der Besitz zusammenträgt und ihn zählt und immer wieder zählt"],["يَحۡسَبُ أَنَّ مَالَهُۥٓ أَخۡلَدَهُۥ","wobei er meint, daß sein Besitz ihn ewig leben ließe"],["كَلَّاۖ لَيُنۢبَذَنَّ فِي ٱلۡحُطَمَةِ","Keineswegs! Er wird ganz gewiß in al-Hutama geworfen werden"],["وَمَآ أَدۡرَىٰكَ مَا ٱلۡحُطَمَةُ","Was läßt dich wissen, was al-Hutama ist"],["نَارُ ٱللَّهِ ٱلۡمُوقَدَةُ","(Sie ist) Allahs entfachtes Feuer"],["ٱلَّتِي تَطَّلِعُ عَلَى ٱلۡأَفۡـِٔدَةِ","das Einblick in die Herzen gewinnt"],["إِنَّهَا عَلَيۡهِم مُّؤۡصَدَةࣱ","Gewiß, es wird sie einschließen"],["فِي عَمَدࣲ مُّمَدَّدَةِۭ","in langgestreckten Säulen"]]},{"n":103,"ar":"العَصْر","tr":"Al-ʿAṣr","de":"Die Zeit","v":[["وَٱلۡعَصۡرِ","Beim Zeitalter"],["إِنَّ ٱلۡإِنسَٰنَ لَفِي خُسۡرٍ","Der Mensch befindet sich wahrlich in Verlust"],["إِلَّا ٱلَّذِينَ ءَامَنُواْ وَعَمِلُواْ ٱلصَّٰلِحَٰتِ وَتَوَاصَوۡاْ بِٱلۡحَقِّ وَتَوَاصَوۡاْ بِٱلصَّبۡرِ","außer denjenigen, die glauben und rechtschaffene Werke tun und einander die Wahrheit eindringlich empfehlen und einander die Standhaftigkeit eindringlich empfehlen"]]},{"n":102,"ar":"التَّكَاثُر","tr":"At-Takāthur","de":"Die Vermehrung","v":[["أَلۡهَىٰكُمُ ٱلتَّكَاثُرُ","Die Vermehrung lenkt euch ab"],["حَتَّىٰ زُرۡتُمُ ٱلۡمَقَابِرَ","bis ihr die Friedhöfe besucht"],["كَلَّا سَوۡفَ تَعۡلَمُونَ","Keineswegs! Ihr werdet (es noch) erfahren"],["ثُمَّ كَلَّا سَوۡفَ تَعۡلَمُونَ","Abermals: Keineswegs! Ihr werdet (es noch) erfahren"],["كَلَّا لَوۡ تَعۡلَمُونَ عِلۡمَ ٱلۡيَقِينِ","Keineswegs! Wenn ihr es nur mit dem Wissen der Gewißheit wüßtet"],["لَتَرَوُنَّ ٱلۡجَحِيمَ","Ihr werdet ganz gewiß den Höllenbrand sehen"],["ثُمَّ لَتَرَوُنَّهَا عَيۡنَ ٱلۡيَقِينِ","Abermals: Ihr werdet ihn mit dem Auge der Gewißheit sehen"],["ثُمَّ لَتُسۡـَٔلُنَّ يَوۡمَئِذٍ عَنِ ٱلنَّعِيمِ","Hierauf werdet ihr an jenem Tag ganz gewiß nach der Wonne gefragt werden"]]},{"n":101,"ar":"القَارِعَة","tr":"Al-Qāriʿa","de":"Das Verhängnis","v":[["ٱلۡقَارِعَةُ","Das Verhängnis"],["مَا ٱلۡقَارِعَةُ","Was ist das Verhängnis"],["وَمَآ أَدۡرَىٰكَ مَا ٱلۡقَارِعَةُ","Und was läßt dich wissen, was das Verhängnis ist"],["يَوۡمَ يَكُونُ ٱلنَّاسُ كَٱلۡفَرَاشِ ٱلۡمَبۡثُوثِ","Am Tag, da die Menschen wie flatternde Motten sein werden"],["وَتَكُونُ ٱلۡجِبَالُ كَٱلۡعِهۡنِ ٱلۡمَنفُوشِ","und die Berge wie zerflockte gefärbte Wolle sein werden"],["فَأَمَّا مَن ثَقُلَتۡ مَوَٰزِينُهُۥ","Was nun jemanden angeht, dessen Waagschalen schwer sind"],["فَهُوَ فِي عِيشَةࣲ رَّاضِيَةࣲ","so wird er in einem zufriedenen Leben sein"],["وَأَمَّا مَنۡ خَفَّتۡ مَوَٰزِينُهُۥ","Was aber jemanden angeht, dessen Waagschalen leicht sind"],["فَأُمُّهُۥ هَاوِيَةࣱ","dessen Mutter wird ein Abgrund sein"],["وَمَآ أَدۡرَىٰكَ مَا هِيَهۡ","Und was läßt dich wissen, was das ist"],["نَارٌ حَامِيَةُۢ","Ein sehr heißes Feuer"]]},{"n":100,"ar":"العَادِيَات","tr":"Al-ʿĀdiyāt","de":"Die Rennenden","v":[["وَٱلۡعَٰدِيَٰتِ ضَبۡحࣰ ا","Bei den schnaubend Rennenden"],["فَٱلۡمُورِيَٰتِ قَدۡحࣰ ا","den (mit ihren Hufen) Funken Schlagenden"],["فَٱلۡمُغِيرَٰتِ صُبۡحࣰ ا","den am Morgen Angreifenden"],["فَأَثَرۡنَ بِهِۦ نَقۡعࣰ ا","die darin Staub aufwirbeln"],["فَوَسَطۡنَ بِهِۦ جَمۡعًا","die dann mitten in die Ansammlung eindringen"],["إِنَّ ٱلۡإِنسَٰنَ لِرَبِّهِۦ لَكَنُودࣱ","Der Mensch ist seinem Herrn gegenüber wahrlich undankbar"],["وَإِنَّهُۥ عَلَىٰ ذَٰلِكَ لَشَهِيدࣱ","und er (selbst) ist darüber wahrlich Zeuge"],["وَإِنَّهُۥ لِحُبِّ ٱلۡخَيۡرِ لَشَدِيدٌ","Und er ist in seiner Liebe zum (eigenen) Besten wahrlich heftig"],["۞أَفَلَا يَعۡلَمُ إِذَا بُعۡثِرَ مَا فِي ٱلۡقُبُورِ","Weiß er denn nicht? Wenn durchwühlt wird, was in den Gräbern ist"],["وَحُصِّلَ مَا فِي ٱلصُّدُورِ","und herausgeholt wird, was in den Brüsten ist"],["إِنَّ رَبَّهُم بِهِمۡ يَوۡمَئِذࣲ لَّخَبِيرُۢ","ihr Herr wird an jenem Tag ihrer wahrlich Kundig sein"]]},{"n":99,"ar":"الزَّلْزَلَة","tr":"Az-Zalzala","de":"Das Beben","v":[["إِذَا زُلۡزِلَتِ ٱلۡأَرۡضُ زِلۡزَالَهَا","Wenn die Erde erschüttert wird durch ihr heftiges Beben"],["وَأَخۡرَجَتِ ٱلۡأَرۡضُ أَثۡقَالَهَا","und die Erde hervorbringt ihre Lasten"],["وَقَالَ ٱلۡإِنسَٰنُ مَا لَهَا","und der Mensch sagt: Was ist mit ihr"],["يَوۡمَئِذࣲ تُحَدِّثُ أَخۡبَارَهَا","an jenem Tag wird sie die Nachrichten über sich erzählen"],["بِأَنَّ رَبَّكَ أَوۡحَىٰ لَهَا","weil dein Herr (es) ihr eingegeben hat"],["يَوۡمَئِذࣲ يَصۡدُرُ ٱلنَّاسُ أَشۡتَاتࣰ ا لِّيُرَوۡاْ أَعۡمَٰلَهُمۡ","An jenem Tag werden die Menschen (in Gruppen) getrennt herauskommen, damit ihnen ihre Werke gezeigt werden"],["فَمَن يَعۡمَلۡ مِثۡقَالَ ذَرَّةٍ خَيۡرࣰ ا يَرَهُۥ","Wer nun im Gewicht eines Stäubchens Gutes tut, wird es sehen"],["وَمَن يَعۡمَلۡ مِثۡقَالَ ذَرَّةࣲ شَرࣰّ ا يَرَهُۥ","Und wer im Gewicht eines Stäubchens Böses tut, wird es sehen"]]},{"n":98,"ar":"البَيِّنَة","tr":"Al-Bayyina","de":"Der klare Beweis","v":[["لَمۡ يَكُنِ ٱلَّذِينَ كَفَرُواْ مِنۡ أَهۡلِ ٱلۡكِتَٰبِ وَٱلۡمُشۡرِكِينَ مُنفَكِّينَ حَتَّىٰ تَأۡتِيَهُمُ ٱلۡبَيِّنَةُ","Diejenigen von den Leuten der Schrift und den Götzendienern, die ungläubig sind, werden sich nicht (eher von ihrem Unglauben) lösen, bis (daß) der klare Beweis zu ihnen kommt"],["رَسُولࣱ مِّنَ ٱللَّهِ يَتۡلُواْ صُحُفࣰ ا مُّطَهَّرَةࣰ","ein Gesandter von Allah, der gereinigte Blätter verliest"],["فِيهَا كُتُبࣱ قَيِّمَةࣱ","in denen rechte Schriften sind"],["وَمَا تَفَرَّقَ ٱلَّذِينَ أُوتُواْ ٱلۡكِتَٰبَ إِلَّا مِنۢ بَعۡدِ مَا جَآءَتۡهُمُ ٱلۡبَيِّنَةُ","Und diejenigen, denen die Schrift gegeben wurde, haben sich nicht eher gespalten, als bis der klare Beweis zu ihnen gekommen ist"],["وَمَآ أُمِرُوٓاْ إِلَّا لِيَعۡبُدُواْ ٱللَّهَ مُخۡلِصِينَ لَهُ ٱلدِّينَ حُنَفَآءَ وَيُقِيمُواْ ٱلصَّلَوٰةَ وَيُؤۡتُواْ ٱلزَّكَوٰةَۚ وَذَٰلِكَ دِينُ ٱلۡقَيِّمَةِ","Und nichts anderes wurde ihnen befohlen, als nur Allah zu dienen und (dabei) Ihm gegenüber aufrichtig in der Religion (zu sein), als Anhänger des rechten Glaubens, und das Gebet zu verrichten und die Abgabe zu entrichten; das ist die Religion des rechten Verhaltens"],["إِنَّ ٱلَّذِينَ كَفَرُواْ مِنۡ أَهۡلِ ٱلۡكِتَٰبِ وَٱلۡمُشۡرِكِينَ فِي نَارِ جَهَنَّمَ خَٰلِدِينَ فِيهَآۚ أُوْلَٰٓئِكَ هُمۡ شَرُّ ٱلۡبَرِيَّةِ","Gewiß, diejenigen unter den Leuten der Schrift und den Götzendienern, die ungläubig sind, werden im Feuer der Hölle sein, ewig darin zu bleiben. Das sind die schlechtesten Geschöpfe"],["إِنَّ ٱلَّذِينَ ءَامَنُواْ وَعَمِلُواْ ٱلصَّٰلِحَٰتِ أُوْلَٰٓئِكَ هُمۡ خَيۡرُ ٱلۡبَرِيَّةِ","Gewiß, diejenigen aber, die glauben und rechtschaffene Werke tun, das sind die besten Geschöpfe"],["جَزَآؤُهُمۡ عِندَ رَبِّهِمۡ جَنَّٰتُ عَدۡنࣲ تَجۡرِي مِن تَحۡتِهَا ٱلۡأَنۡهَٰرُ خَٰلِدِينَ فِيهَآ أَبَدࣰ اۖ رَّضِيَ ٱللَّهُ عَنۡهُمۡ وَرَضُواْ عَنۡهُۚ ذَٰلِكَ لِمَنۡ خَشِيَ رَبَّهُۥ","Ihr Lohn bei ihrem Herrn sind die Gärten Edens, durcheilt von Bächen, ewig und auf immer darin zu bleiben. Allah hat Wohlgefallen an ihnen, und sie haben Wohlgefallen an Ihm; das ist für jemanden, der seinen Herrn fürchtet"]]},{"n":97,"ar":"القَدْر","tr":"Al-Qadr","de":"Die Bestimmung","v":[["إِنَّآ أَنزَلۡنَٰهُ فِي لَيۡلَةِ ٱلۡقَدۡرِ","Wir haben ihn ja in der Nacht der Bestimmung hinabgesandt"],["وَمَآ أَدۡرَىٰكَ مَا لَيۡلَةُ ٱلۡقَدۡرِ","Und was läßt dich wissen, was die Nacht der Bestimmung ist"],["لَيۡلَةُ ٱلۡقَدۡرِ خَيۡرࣱ مِّنۡ أَلۡفِ شَهۡرࣲ","Die Nacht der Bestimmung ist besser als tausend Monate"],["تَنَزَّلُ ٱلۡمَلَٰٓئِكَةُ وَٱلرُّوحُ فِيهَا بِإِذۡنِ رَبِّهِم مِّن كُلِّ أَمۡرࣲ","Es kommen die Engel und der Geist in ihr mit der Erlaubnis ihres Herrn mit jeder Angelegenheit herab"],["سَلَٰمٌ هِيَ حَتَّىٰ مَطۡلَعِ ٱلۡفَجۡرِ","Frieden ist sie bis zum Anbruch der Morgendämmerung"]]},{"n":96,"ar":"العَلَق","tr":"Al-ʿAlaq","de":"Das Anhängsel","v":[["ٱقۡرَأۡ بِٱسۡمِ رَبِّكَ ٱلَّذِي خَلَقَ","Lies im Namen deines Herrn, Der erschaffen hat"],["خَلَقَ ٱلۡإِنسَٰنَ مِنۡ عَلَقٍ","den Menschen erschaffen hat aus einem Anhängsel"],["ٱقۡرَأۡ وَرَبُّكَ ٱلۡأَكۡرَمُ","Lies, und dein Herr ist der Edelste"],["ٱلَّذِي عَلَّمَ بِٱلۡقَلَمِ","Der (das Schreiben) mit dem Schreibrohr gelehrt hat"],["عَلَّمَ ٱلۡإِنسَٰنَ مَا لَمۡ يَعۡلَمۡ","den Menschen gelehrt hat, was er nicht wußte"],["كَلَّآ إِنَّ ٱلۡإِنسَٰنَ لَيَطۡغَىٰٓ","Keineswegs! Der Mensch lehnt sich wahrlich auf"],["أَن رَّءَاهُ ٱسۡتَغۡنَىٰٓ","daß er von sich meint, unbedürftig zu sein"],["إِنَّ إِلَىٰ رَبِّكَ ٱلرُّجۡعَىٰٓ","Gewiß, zu deinem Herrn wird die Rückkehr sein"],["أَرَءَيۡتَ ٱلَّذِي يَنۡهَىٰ","Siehst du denjenigen, der abhält"],["عَبۡدًا إِذَا صَلَّىٰٓ","einen Diener, wenn er betet"],["أَرَءَيۡتَ إِن كَانَ عَلَى ٱلۡهُدَىٰٓ","Siehst du! Obwohl er nach der Rechtleitung verfährt"],["أَوۡ أَمَرَ بِٱلتَّقۡوَىٰٓ","oder die Gottesfurcht gebietet"],["أَرَءَيۡتَ إِن كَذَّبَ وَتَوَلَّىٰٓ","Siehst du! Wie (wäre es) wenn er (die Botschaft) für Lüge erklärt und sich abkehrt"],["أَلَمۡ يَعۡلَم بِأَنَّ ٱللَّهَ يَرَىٰ","Weiß er denn nicht, daß Allah sieht"],["كَلَّا لَئِن لَّمۡ يَنتَهِ لَنَسۡفَعَۢا بِٱلنَّاصِيَةِ","Keineswegs! Wenn er nicht aufhört, werden Wir ihn ganz gewiß an der Stirnlocke packen und ziehen"],["نَاصِيَةࣲ كَٰذِبَةٍ خَاطِئَةࣲ","einer Stirnlocke, einer lügnerischen, einer verfehlt handelnden"],["فَلۡيَدۡعُ نَادِيَهُۥ","So soll er doch seine Genossen rufen"],["سَنَدۡعُ ٱلزَّبَانِيَةَ","Wir werden die (Höllen)wache rufen"],["كَلَّا لَا تُطِعۡهُ وَٱسۡجُدۡۤ وَٱقۡتَرِب۩","Keineswegs! Gehorche ihm nicht, sondern wirf dich nieder und sei (Allah) nah"]]},{"n":95,"ar":"التِّين","tr":"At-Tīn","de":"Die Feige","v":[["وَٱلتِّينِ وَٱلزَّيۡتُونِ","Bei der Feige und der Olive"],["وَطُورِ سِينِينَ","und dem Berg Sinin"],["وَهَٰذَا ٱلۡبَلَدِ ٱلۡأَمِينِ","und dieser sicheren Ortschaft"],["لَقَدۡ خَلَقۡنَا ٱلۡإِنسَٰنَ فِيٓ أَحۡسَنِ تَقۡوِيمࣲ","Wir haben den Menschen ja in schönster Gestaltung erschaffen"],["ثُمَّ رَدَدۡنَٰهُ أَسۡفَلَ سَٰفِلِينَ","hierauf haben Wir ihn zu den Niedrigsten der Niedrigen werden lassen"],["إِلَّا ٱلَّذِينَ ءَامَنُواْ وَعَمِلُواْ ٱلصَّٰلِحَٰتِ فَلَهُمۡ أَجۡرٌ غَيۡرُ مَمۡنُونࣲ","außer denjenigen, die glauben und rechtschaffene Werke tun; für sie wird es einen Lohn geben, der nicht aufhört"],["فَمَا يُكَذِّبُكَ بَعۡدُ بِٱلدِّينِ","Was läßt dich da weiterhin das Gericht für Lüge erklären"],["أَلَيۡسَ ٱللَّهُ بِأَحۡكَمِ ٱلۡحَٰكِمِينَ","Ist nicht Allah der Weiseste derjenigen, die richten"]]},{"n":94,"ar":"الشَّرْح","tr":"Asch-Scharḥ","de":"Das Weiten","v":[["أَلَمۡ نَشۡرَحۡ لَكَ صَدۡرَكَ","Haben Wir dir nicht deine Brust aufgetan"],["وَوَضَعۡنَا عَنكَ وِزۡرَكَ","und dir deine Last abgenommen"],["ٱلَّذِيٓ أَنقَضَ ظَهۡرَكَ","die deinen Rücken niederdrückte"],["وَرَفَعۡنَا لَكَ ذِكۡرَكَ","und dir dein Ansehen erhöht"],["فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا","Also gewiß, mit der Erschwernis ist Erleichterung"],["إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرࣰ ا","gewiß, mit der Erschwernis ist Erleichterung"],["فَإِذَا فَرَغۡتَ فَٱنصَبۡ","Wenn du nun fertig bist, dann strenge dich an"],["وَإِلَىٰ رَبِّكَ فَٱرۡغَب","und nach deinem Herrn richte dein Begehren aus"]]},{"n":93,"ar":"الضُّحَى","tr":"Aḍ-Ḍuḥā","de":"Die Morgenhelle","v":[["وَٱلضُّحَىٰ","Bei der Morgenhelle"],["وَٱلَّيۡلِ إِذَا سَجَىٰ","und der Nacht, wenn sie (alles) umhüllt"],["مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ","Dein Herr hat sich weder von dir verabschiedet noch haßt Er (dich)"],["وَلَلۡأٓخِرَةُ خَيۡرࣱ لَّكَ مِنَ ٱلۡأُولَىٰ","Und das Jenseits ist wahrlich besser für dich als das Diesseits"],["وَلَسَوۡفَ يُعۡطِيكَ رَبُّكَ فَتَرۡضَىٰٓ","Und dein Herr wird dir wahrlich geben, und dann wirst du zufrieden sein"],["أَلَمۡ يَجِدۡكَ يَتِيمࣰ ا فَـَٔاوَىٰ","Hat Er dich nicht als Waise gefunden und (dir) dann Zuflucht verschafft"],["وَوَجَدَكَ ضَآلࣰّ ا فَهَدَىٰ","und dich irregehend gefunden und dann rechtgeleitet"],["وَوَجَدَكَ عَآئِلࣰ ا فَأَغۡنَىٰ","und dich arm gefunden und dann reich gemacht"],["فَأَمَّا ٱلۡيَتِيمَ فَلَا تَقۡهَرۡ","Was nun die Waise angeht, so unterjoche (sie) nicht"],["وَأَمَّا ٱلسَّآئِلَ فَلَا تَنۡهَرۡ","und was den Bettler angeht, so fahre (ihn) nicht an"],["وَأَمَّا بِنِعۡمَةِ رَبِّكَ فَحَدِّثۡ","und was die Gunst deines Herrn angeht, so erzähle (davon)"]]},{"n":92,"ar":"اللَّيْل","tr":"Al-Lail","de":"Die Nacht","v":[["وَٱلَّيۡلِ إِذَا يَغۡشَىٰ","Bei der Nacht, wenn sie (alles) überdeckt"],["وَٱلنَّهَارِ إِذَا تَجَلَّىٰ","und dem Tag, wenn er (in seiner Helligkeit) erscheint"],["وَمَا خَلَقَ ٱلذَّكَرَ وَٱلۡأُنثَىٰٓ","und Dem, Der das Männliche und das Weibliche erschaffen hat"],["إِنَّ سَعۡيَكُمۡ لَشَتَّىٰ","Euer Bemühen ist wahrlich verschieden"],["فَأَمَّا مَنۡ أَعۡطَىٰ وَٱتَّقَىٰ","Was nun jemanden angeht, der gibt und gottesfürchtig ist"],["وَصَدَّقَ بِٱلۡحُسۡنَىٰ","und das Beste für wahr hält"],["فَسَنُيَسِّرُهُۥ لِلۡيُسۡرَىٰ","so werden Wir ihm den Weg zum Leichteren leicht machen"],["وَأَمَّا مَنۢ بَخِلَ وَٱسۡتَغۡنَىٰ","Was aber jemanden angeht, der geizt und sich für unbedürftig hält"],["وَكَذَّبَ بِٱلۡحُسۡنَىٰ","und das Beste für Lüge erklärt"],["فَسَنُيَسِّرُهُۥ لِلۡعُسۡرَىٰ","so werden Wir ihm den Weg zum Schwereren leicht machen"],["وَمَا يُغۡنِي عَنۡهُ مَالُهُۥٓ إِذَا تَرَدَّىٰٓ","und was soll sein Besitz ihm nützen, wenn er sich ins Verderben stürzt"],["إِنَّ عَلَيۡنَا لَلۡهُدَىٰ","Uns obliegt wahrlich die Rechtleitung"],["وَإِنَّ لَنَا لَلۡأٓخِرَةَ وَٱلۡأُولَىٰ","Und Uns gehört wahrlich das Jenseits und das Diesseits"],["فَأَنذَرۡتُكُمۡ نَارࣰ ا تَلَظَّىٰ","So habe Ich euch gewarnt vor einem Feuer, das lodert"],["لَا يَصۡلَىٰهَآ إِلَّا ٱلۡأَشۡقَى","dem nur der Unseligste ausgesetzt sein wird"],["ٱلَّذِي كَذَّبَ وَتَوَلَّىٰ","der (die Botschaft) für Lüge erklärt und sich abkehrt"],["وَسَيُجَنَّبُهَا ٱلۡأَتۡقَى","Doch davon ferngehalten wird der Gottesfürchtigste werden"],["ٱلَّذِي يُؤۡتِي مَالَهُۥ يَتَزَكَّىٰ","der seinen Besitz hingibt, um sich zu läutern"],["وَمَا لِأَحَدٍ عِندَهُۥ مِن نِّعۡمَةࣲ تُجۡزَىٰٓ","und niemand hat bei ihm eine Gunst (anzurechnen), die vergolten werden müßte"],["إِلَّا ٱبۡتِغَآءَ وَجۡهِ رَبِّهِ ٱلۡأَعۡلَىٰ","sondern (er handelt) im Trachten nach dem Angesicht seines höchsten Herrn"],["وَلَسَوۡفَ يَرۡضَىٰ","Und er wird wahrlich zufrieden sein"]]},{"n":91,"ar":"الشَّمْس","tr":"Asch-Schams","de":"Die Sonne","v":[["وَٱلشَّمۡسِ وَضُحَىٰهَا","Bei der Sonne und ihrer Morgenhelle"],["وَٱلۡقَمَرِ إِذَا تَلَىٰهَا","und dem Mond, wenn er ihr folgt"],["وَٱلنَّهَارِ إِذَا جَلَّىٰهَا","und dem Tag, wenn er sie erscheinen läßt"],["وَٱلَّيۡلِ إِذَا يَغۡشَىٰهَا","und der Nacht, wenn sie sie überdeckt"],["وَٱلسَّمَآءِ وَمَا بَنَىٰهَا","und dem Himmel und Dem, Der ihn aufgebaut hat"],["وَٱلۡأَرۡضِ وَمَا طَحَىٰهَا","und der Erde und Dem, Der sie ausgebreitet hat"],["وَنَفۡسࣲ وَمَا سَوَّىٰهَا","und einer (jeden) Seele und Dem, Der sie zurechtgeformt hat"],["فَأَلۡهَمَهَا فُجُورَهَا وَتَقۡوَىٰهَا","und ihr dann ihre Sittenlosigkeit und ihre Gottesfurcht eingegeben hat"],["قَدۡ أَفۡلَحَ مَن زَكَّىٰهَا","Wohl ergehen wird es ja jemandem, der sie läutert"],["وَقَدۡ خَابَ مَن دَسَّىٰهَا","und enttäuscht sein wird ja, wer sie verkümmern läßt"],["كَذَّبَتۡ ثَمُودُ بِطَغۡوَىٰهَآ","Die Tamud erklärten in ihrer Auflehnung (die Botschaft) für Lüge"],["إِذِ ٱنۢبَعَثَ أَشۡقَىٰهَا","als der Unseligste von ihnen sich erhob"],["فَقَالَ لَهُمۡ رَسُولُ ٱللَّهِ نَاقَةَ ٱللَّهِ وَسُقۡيَٰهَا","Allahs Gesandter sagte zu ihnen: (Achtet auf) Allahs Kamelstute und ihre Trinkzeit"],["فَكَذَّبُوهُ فَعَقَرُوهَا فَدَمۡدَمَ عَلَيۡهِمۡ رَبُّهُم بِذَنۢبِهِمۡ فَسَوَّىٰهَا","Sie aber bezichtigten ihn der Lüge, und so schnitten sie ihr die Sehnen durch. Da schmetterte ihr Herr sie für ihre Sünde nieder, und so ebnete Er über ihnen die Erde ein"],["وَلَا يَخَافُ عُقۡبَٰهَا","Und Er (Allah) fürchtet nicht die Folge davon"]]},{"n":90,"ar":"البَلَد","tr":"Al-Balad","de":"Die Ortschaft","v":[["لَآ أُقۡسِمُ بِهَٰذَا ٱلۡبَلَدِ","Nein, Ich schwöre bei dieser Ortschaft"],["وَأَنتَ حِلُّۢ بِهَٰذَا ٱلۡبَلَدِ","wo du in dieser Ortschaft deinen Aufenthalt hast"],["وَوَالِدࣲ وَمَا وَلَدَ","und bei einem (jeden) Erzeuger und dem, was er zeugt"],["لَقَدۡ خَلَقۡنَا ٱلۡإِنسَٰنَ فِي كَبَدٍ","Wir haben den Menschen ja (zu einem Leben) in Mühsal erschaffen"],["أَيَحۡسَبُ أَن لَّن يَقۡدِرَ عَلَيۡهِ أَحَدࣱ","Meint er etwa, daß überhaupt niemand Macht über ihn hat"],["يَقُولُ أَهۡلَكۡتُ مَالࣰ ا لُّبَدًا","Er sagt: Ich habe Besitz in Mengen verbraucht"],["أَيَحۡسَبُ أَن لَّمۡ يَرَهُۥٓ أَحَدٌ","Meint er etwa, daß niemand ihn gesehen hat"],["أَلَمۡ نَجۡعَل لَّهُۥ عَيۡنَيۡنِ","Haben Wir ihm nicht zwei Augen gemacht"],["وَلِسَانࣰ ا وَشَفَتَيۡنِ","eine Zunge und zwei Lippen"],["وَهَدَيۡنَٰهُ ٱلنَّجۡدَيۡنِ","und ihn beide Hochebenen geleitet"],["فَلَا ٱقۡتَحَمَ ٱلۡعَقَبَةَ","Aber er ist nicht den steilen Paßweg hinaufgestürmt"],["وَمَآ أَدۡرَىٰكَ مَا ٱلۡعَقَبَةُ","Und was läßt dich wissen, was der steile Paßweg ist"],["فَكُّ رَقَبَةٍ","(Es ist) die Freilassung eines Sklaven"],["أَوۡ إِطۡعَٰمࣱ فِي يَوۡمࣲ ذِي مَسۡغَبَةࣲ","oder zu speisen am Tag der Hungersnot"],["يَتِيمࣰ ا ذَا مَقۡرَبَةٍ","eine Waise, die einem nahe ist"],["أَوۡ مِسۡكِينࣰ ا ذَا مَتۡرَبَةࣲ","oder einen Armen, der dem Boden nahe ist"],["ثُمَّ كَانَ مِنَ ٱلَّذِينَ ءَامَنُواْ وَتَوَاصَوۡاْ بِٱلصَّبۡرِ وَتَوَاصَوۡاْ بِٱلۡمَرۡحَمَةِ","Und daß man hierauf zu denjenigen gehört, die glauben, einander die Standhaftigkeit eindringlich empfehlen und einander die Barmherzigkeit eindringlich empfehlen"],["أُوْلَٰٓئِكَ أَصۡحَٰبُ ٱلۡمَيۡمَنَةِ","Das sind die Gefährten der rechten Seite"],["وَٱلَّذِينَ كَفَرُواْ بِـَٔايَٰتِنَا هُمۡ أَصۡحَٰبُ ٱلۡمَشۡـَٔمَةِ","Diejenigen aber, die Unsere Zeichen verleugnen, sie sind die Gefährten der unglückseligen Seite"],["عَلَيۡهِمۡ نَارࣱ مُّؤۡصَدَةُۢ","Über ihnen liegt ein (sie) einschließendes Feuer"]]},{"n":89,"ar":"الفَجْر","tr":"Al-Fadschr","de":"Die Morgendämmerung","v":[["وَٱلۡفَجۡرِ","Bei der Morgendämmerung"],["وَلَيَالٍ عَشۡرࣲ","und den zehn Nächten"],["وَٱلشَّفۡعِ وَٱلۡوَتۡرِ","und dem geraden und dem ungeraden (Tag)"],["وَٱلَّيۡلِ إِذَا يَسۡرِ","und der Nacht, wenn sie fortzieht"],["هَلۡ فِي ذَٰلِكَ قَسَمࣱ لِّذِي حِجۡرٍ","Ist darin ein (ausreichender) Schwur für jemanden, der Klugheit besitzt"],["أَلَمۡ تَرَ كَيۡفَ فَعَلَ رَبُّكَ بِعَادٍ","Siehst du nicht, wie dein Herr mit den ’Ad verfuhr"],["إِرَمَ ذَاتِ ٱلۡعِمَادِ","(mit) Iram mit den Stützen"],["ٱلَّتِي لَمۡ يُخۡلَقۡ مِثۡلُهَا فِي ٱلۡبِلَٰدِ","dergleichen nicht erschaffen wurden in den Landstrichen"],["وَثَمُودَ ٱلَّذِينَ جَابُواْ ٱلصَّخۡرَ بِٱلۡوَادِ","Und (mit) den Tamud, die im Tal die Felsen aushöhlten"],["وَفِرۡعَوۡنَ ذِي ٱلۡأَوۡتَادِ","Und (mit) Fir’aun, dem Besitzer der Pfähle"],["ٱلَّذِينَ طَغَوۡاْ فِي ٱلۡبِلَٰدِ","die (sie alle) das Maß (an Frevel) in den Landstrichen überschritten"],["فَأَكۡثَرُواْ فِيهَا ٱلۡفَسَادَ","und darin viel Unheil stifteten"],["فَصَبَّ عَلَيۡهِمۡ رَبُّكَ سَوۡطَ عَذَابٍ","Da schüttete dein Herr auf sie eine Geißel von Strafe aus"],["إِنَّ رَبَّكَ لَبِٱلۡمِرۡصَادِ","Gewiß, dein Herr wartet ja (auf sie)"],["فَأَمَّا ٱلۡإِنسَٰنُ إِذَا مَا ٱبۡتَلَىٰهُ رَبُّهُۥ فَأَكۡرَمَهُۥ وَنَعَّمَهُۥ فَيَقُولُ رَبِّيٓ أَكۡرَمَنِ","Was nun den Menschen angeht, wenn sein Herr ihn prüft und ihn da(bei) freigebig behandelt und ihm ein wonnevolles Leben verschafft, so sagt er: Mein Herr behandelt mich freigebig"],["وَأَمَّآ إِذَا مَا ٱبۡتَلَىٰهُ فَقَدَرَ عَلَيۡهِ رِزۡقَهُۥ فَيَقُولُ رَبِّيٓ أَهَٰنَنِ","Was (ihn) aber angeht, wenn Er ihn prüft und ihm da(bei) seine Versorgung bemißt, so sagt er: Mein Herr setzt mich der Schmach aus"],["كَلَّاۖ بَل لَّا تُكۡرِمُونَ ٱلۡيَتِيمَ","Keineswegs! Vielmehr behandelt ihr die Waise nicht freigebig"],["وَلَا تَحَٰٓضُّونَ عَلَىٰ طَعَامِ ٱلۡمِسۡكِينِ","und haltet euch nicht gegenseitig zur Speisung des Armen an"],["وَتَأۡكُلُونَ ٱلتُّرَاثَ أَكۡلࣰ ا لَّمࣰّ ا","Und ihr verzehrt das Erbe, ja ihr verzehrt es ganz und gar"],["وَتُحِبُّونَ ٱلۡمَالَ حُبࣰّ ا جَمࣰّ ا","Und ihr liebt den Besitz, ja ihr liebt ihn voll und ganz"],["كَلَّآۖ إِذَا دُكَّتِ ٱلۡأَرۡضُ دَكࣰّ ا دَكࣰّ ا","Keineswegs! Wenn die Erde eingeebnet, ja platt eingeebnet wird"],["وَجَآءَ رَبُّكَ وَٱلۡمَلَكُ صَفࣰّ ا صَفࣰّ ا","und dein Herr kommt und die Engel, Reihe um Reihe"],["وَجِاْيٓءَ يَوۡمَئِذِۭ بِجَهَنَّمَۚ يَوۡمَئِذࣲ يَتَذَكَّرُ ٱلۡإِنسَٰنُ وَأَنَّىٰ لَهُ ٱلذِّكۡرَىٰ","und herbeigebracht wird an jenem Tag die Hölle, an jenem Tag wird der Mensch bedenken. Wie soll ihm dann die Selbstbesinnung (nützen)"],["يَقُولُ يَٰلَيۡتَنِي قَدَّمۡتُ لِحَيَاتِي","Er wird sagen: O hätte ich doch für mein (jenseitiges) Leben (etwas) vorausgeschickt"],["فَيَوۡمَئِذࣲ لَّا يُعَذِّبُ عَذَابَهُۥٓ أَحَدࣱ","An jenem Tag wird niemand strafen, so wie Er straft"],["وَلَا يُوثِقُ وَثَاقَهُۥٓ أَحَدࣱ","und niemand wird fesseln, so wie Er fesselt"],["يَٰٓأَيَّتُهَا ٱلنَّفۡسُ ٱلۡمُطۡمَئِنَّةُ","O du Seele, die du Ruhe gefunden hast"],["ٱرۡجِعِيٓ إِلَىٰ رَبِّكِ رَاضِيَةࣰ مَّرۡضِيَّةࣰ","kehre zu deinem Herrn zufrieden und mit Wohlgefallen zurück"],["فَٱدۡخُلِي فِي عِبَٰدِي","Tritt ein unter Meine Diener"],["وَٱدۡخُلِي جَنَّتِي","und tritt ein in Meinen (Paradies)garten"]]},{"n":88,"ar":"الغَاشِيَة","tr":"Al-Ghāschiya","de":"Die Bedeckende","v":[["هَلۡ أَتَىٰكَ حَدِيثُ ٱلۡغَٰشِيَةِ","Ist zu dir die Geschichte der Überdeckenden gekommen"],["وُجُوهࣱ يَوۡمَئِذٍ خَٰشِعَةٌ","(Die einen) Gesichter werden an jenem Tag demütig sein"],["عَامِلَةࣱ نَّاصِبَةࣱ","sich abarbeitend und von Mühsal erfüllt"],["تَصۡلَىٰ نَارًا حَامِيَةࣰ","einem sehr heißen Feuer ausgesetzt"],["تُسۡقَىٰ مِنۡ عَيۡنٍ ءَانِيَةࣲ","und aus einer siedenden Quelle zu trinken bekommen"],["لَّيۡسَ لَهُمۡ طَعَامٌ إِلَّا مِن ضَرِيعࣲ","Es wird für sie keine Speise geben außer aus trockenen Dornen"],["لَّا يُسۡمِنُ وَلَا يُغۡنِي مِن جُوعࣲ","die weder fett machen noch gegen den Hunger nützen"],["وُجُوهࣱ يَوۡمَئِذࣲ نَّاعِمَةࣱ","(Die anderen) Gesichter werden an jenem Tag wonnig sein"],["لِّسَعۡيِهَا رَاضِيَةࣱ","mit ihrem Bemühen zufrieden"],["فِي جَنَّةٍ عَالِيَةࣲ","und in einem hohen Garten"],["لَّا تَسۡمَعُ فِيهَا لَٰغِيَةࣰ","worin sie keine unbedachte Rede hören"],["فِيهَا عَيۡنࣱ جَارِيَةࣱ","Darin gibt es eine fließende Quelle"],["فِيهَا سُرُرࣱ مَّرۡفُوعَةࣱ","darin gibt es erhöhte Liegen"],["وَأَكۡوَابࣱ مَّوۡضُوعَةࣱ","und hingestellte Trinkschalen"],["وَنَمَارِقُ مَصۡفُوفَةࣱ","und aufgereihte Kissen"],["وَزَرَابِيُّ مَبۡثُوثَةٌ","und ausgebreitete Teppiche"],["أَفَلَا يَنظُرُونَ إِلَى ٱلۡإِبِلِ كَيۡفَ خُلِقَتۡ","Schauen sie denn nicht zu den Kamelen, wie sie erschaffen worden sind"],["وَإِلَى ٱلسَّمَآءِ كَيۡفَ رُفِعَتۡ","und zum Himmel, wie er emporgehoben worden ist"],["وَإِلَى ٱلۡجِبَالِ كَيۡفَ نُصِبَتۡ","und zu den Bergen, wie sie aufgerichtet worden sind"],["وَإِلَى ٱلۡأَرۡضِ كَيۡفَ سُطِحَتۡ","und zur Erde, wie sie flach gemacht worden ist"],["فَذَكِّرۡ إِنَّمَآ أَنتَ مُذَكِّرࣱ","So ermahne; du bist nur ein Ermahner"],["لَّسۡتَ عَلَيۡهِم بِمُصَيۡطِرٍ","Du übst nicht die Oberherrschaft über sie aus"],["إِلَّا مَن تَوَلَّىٰ وَكَفَرَ","Wer sich aber abkehrt und ungläubig ist"],["فَيُعَذِّبُهُ ٱللَّهُ ٱلۡعَذَابَ ٱلۡأَكۡبَرَ","den straft dann Allah mit der größten Strafe"],["إِنَّ إِلَيۡنَآ إِيَابَهُمۡ","Gewiß, zu Uns ist ihre Rückkehr"],["ثُمَّ إِنَّ عَلَيۡنَا حِسَابَهُم","und gewiß, hierauf obliegt Uns ihre Abrechnung"]]},{"n":87,"ar":"الأَعْلَى","tr":"Al-Aʿlā","de":"Der Höchste","v":[["سَبِّحِ ٱسۡمَ رَبِّكَ ٱلۡأَعۡلَى","Preise den Namen deines höchsten Herrn"],["ٱلَّذِي خَلَقَ فَسَوَّىٰ","Der erschafft und dann zurechtformt"],["وَٱلَّذِي قَدَّرَ فَهَدَىٰ","und Der das Maß festsetzt und dann rechtleitet"],["وَٱلَّذِيٓ أَخۡرَجَ ٱلۡمَرۡعَىٰ","und Der die Weide hervorbringt"],["فَجَعَلَهُۥ غُثَآءً أَحۡوَىٰ","und sie dann zu dunkelbrauner Spreu macht"],["سَنُقۡرِئُكَ فَلَا تَنسَىٰٓ","Wir werden dich lesen lassen, und dann wirst du nichts vergessen"],["إِلَّا مَا شَآءَ ٱللَّهُۚ إِنَّهُۥ يَعۡلَمُ ٱلۡجَهۡرَ وَمَا يَخۡفَىٰ","außer dem, was Allah will. Er weiß ja, was laut vernehmbar geäußert wird und was verborgen bleibt"],["وَنُيَسِّرُكَ لِلۡيُسۡرَىٰ","Und Wir werden dir den Weg zum Leichteren leicht machen"],["فَذَكِّرۡ إِن نَّفَعَتِ ٱلذِّكۡرَىٰ","So ermahne -, wenn die Ermahnung nützt"],["سَيَذَّكَّرُ مَن يَخۡشَىٰ","Bedenken wird jemand, der gottesfürchtig ist"],["وَيَتَجَنَّبُهَا ٱلۡأَشۡقَى","Meiden aber wird es der Unseligste"],["ٱلَّذِي يَصۡلَى ٱلنَّارَ ٱلۡكُبۡرَىٰ","der dem größten (Höllen)feuer ausgesetzt sein wird"],["ثُمَّ لَا يَمُوتُ فِيهَا وَلَا يَحۡيَىٰ","darin wird er hierauf weder sterben noch leben"],["قَدۡ أَفۡلَحَ مَن تَزَكَّىٰ","Wohl ergehen wird es ja jemandem, der sich läutert"],["وَذَكَرَ ٱسۡمَ رَبِّهِۦ فَصَلَّىٰ","und des Namens seines Herrn gedenkt; so betet er"],["بَلۡ تُؤۡثِرُونَ ٱلۡحَيَوٰةَ ٱلدُّنۡيَا","Nein! Vielmehr zieht ihr das diesseitige Leben vor"],["وَٱلۡأٓخِرَةُ خَيۡرࣱ وَأَبۡقَىٰٓ","während das Jenseits besser und beständiger ist"],["إِنَّ هَٰذَا لَفِي ٱلصُّحُفِ ٱلۡأُولَىٰ","Dies ist wahrlich in den früheren Blättern (enthalten)"],["صُحُفِ إِبۡرَٰهِيمَ وَمُوسَىٰ","den Blättern Ibrahims und Musas"]]},{"n":86,"ar":"الطَّارِق","tr":"Aṭ-Ṭāriq","de":"Der Pochende","v":[["وَٱلسَّمَآءِ وَٱلطَّارِقِ","Beim Himmel und dem Pochenden"],["وَمَآ أَدۡرَىٰكَ مَا ٱلطَّارِقُ","Und was läßt dich wissen, was der Pochende ist"],["ٱلنَّجۡمُ ٱلثَّاقِبُ","(Es ist) der durchbohrend helle Stem"],["إِن كُلُّ نَفۡسࣲ لَّمَّا عَلَيۡهَا حَافِظࣱ","Es gibt keine Seele, über der nicht ein Hüter (eingesetzt) ist"],["فَلۡيَنظُرِ ٱلۡإِنسَٰنُ مِمَّ خُلِقَ","So soll der Mensch doch hinsehen, woraus er erschaffen ist"],["خُلِقَ مِن مَّآءࣲ دَافِقࣲ","Er ist aus sich ergießendem Wasser erschaffen"],["يَخۡرُجُ مِنۢ بَيۡنِ ٱلصُّلۡبِ وَٱلتَّرَآئِبِ","das zwischen der Lende und der (weiblichen) Brust hervorkommt"],["إِنَّهُۥ عَلَىٰ رَجۡعِهِۦ لَقَادِرࣱ","Er hat die Macht dazu, ihn zurückkehren zu lassen"],["يَوۡمَ تُبۡلَى ٱلسَّرَآئِرُ","am Tag, da die geheimsten Gedanken geprüft werden"],["فَمَا لَهُۥ مِن قُوَّةࣲ وَلَا نَاصِرࣲ","Dann hat er weder Kraft noch einen Helfer"],["وَٱلسَّمَآءِ ذَاتِ ٱلرَّجۡعِ","Beim Himmel mit der Wiederkehr"],["وَٱلۡأَرۡضِ ذَاتِ ٱلصَّدۡعِ","und der Erde mit ihren Sprüngen"],["إِنَّهُۥ لَقَوۡلࣱ فَصۡلࣱ","Er ist wahrlich ein entscheidendes Wort"],["وَمَا هُوَ بِٱلۡهَزۡلِ","er ist kein Scherz"],["إِنَّهُمۡ يَكِيدُونَ كَيۡدࣰ ا","Sie wenden eine List an"],["وَأَكِيدُ كَيۡدࣰ ا","Und Ich wende eine List an"],["فَمَهِّلِ ٱلۡكَٰفِرِينَ أَمۡهِلۡهُمۡ رُوَيۡدَۢا","So lasse den Ungläubigen noch Zeit; lasse ihnen nur eine Weile Zeit"]]},{"n":85,"ar":"البُرُوج","tr":"Al-Burūdsch","de":"Die Türme","v":[["وَٱلسَّمَآءِ ذَاتِ ٱلۡبُرُوجِ","Beim Himmel mit den Türmen"],["وَٱلۡيَوۡمِ ٱلۡمَوۡعُودِ","und dem versprochenen Tag"],["وَشَاهِدࣲ وَمَشۡهُودࣲ","und dem Zeugen und dem Bezeugten"],["قُتِلَ أَصۡحَٰبُ ٱلۡأُخۡدُودِ","Tod (sei) geweiht den Leuten des Grabens"],["ٱلنَّارِ ذَاتِ ٱلۡوَقُودِ","des Feuers mit dem (vielen) Brennstoff"],["إِذۡ هُمۡ عَلَيۡهَا قُعُودࣱ","als sie daran saßen"],["وَهُمۡ عَلَىٰ مَا يَفۡعَلُونَ بِٱلۡمُؤۡمِنِينَ شُهُودࣱ","und Zeugen dessen waren, was sie den Gläubigen antaten"],["وَمَا نَقَمُواْ مِنۡهُمۡ إِلَّآ أَن يُؤۡمِنُواْ بِٱللَّهِ ٱلۡعَزِيزِ ٱلۡحَمِيدِ","Und sie grollten ihnen nur, daß sie an Allah glaubten, den Allmächtigen und Lobenswürdigen"],["ٱلَّذِي لَهُۥ مُلۡكُ ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضِۚ وَٱللَّهُ عَلَىٰ كُلِّ شَيۡءࣲ شَهِيدٌ","Dem die Herrschaft der Himmel und der Erde gehört. Und Allah ist über alles Zeuge"],["إِنَّ ٱلَّذِينَ فَتَنُواْ ٱلۡمُؤۡمِنِينَ وَٱلۡمُؤۡمِنَٰتِ ثُمَّ لَمۡ يَتُوبُواْ فَلَهُمۡ عَذَابُ جَهَنَّمَ وَلَهُمۡ عَذَابُ ٱلۡحَرِيقِ","Gewiß, diejenigen, die die gläubigen Männer und die gläubigen Frauen in Versuchung bringen und hierauf nicht in Reue umkehren, für sie wird es die Strafe der Hölle geben, und für sie wird es die Strafe des Brennens geben"],["إِنَّ ٱلَّذِينَ ءَامَنُواْ وَعَمِلُواْ ٱلصَّٰلِحَٰتِ لَهُمۡ جَنَّٰتࣱ تَجۡرِي مِن تَحۡتِهَا ٱلۡأَنۡهَٰرُۚ ذَٰلِكَ ٱلۡفَوۡزُ ٱلۡكَبِيرُ","Gewiß, diejenigen, die glauben und rechtschaffene Werke tun, für sie wird es Gärten geben, durcheilt von Bächen; das ist der große Erfolg"],["إِنَّ بَطۡشَ رَبِّكَ لَشَدِيدٌ","Das Zupacken deines Herrn ist wahrlich hart"],["إِنَّهُۥ هُوَ يُبۡدِئُ وَيُعِيدُ","Gewiß, Er macht den Anfang und läßt wiederkehren"],["وَهُوَ ٱلۡغَفُورُ ٱلۡوَدُودُ","Und Er ist der Allvergebende und Liebevolle"],["ذُو ٱلۡعَرۡشِ ٱلۡمَجِيدُ","der Herr des Thrones, der Ruhmvolle"],["فَعَّالࣱ لِّمَا يُرِيدُ","(Er) tut alles, was Er will"],["هَلۡ أَتَىٰكَ حَدِيثُ ٱلۡجُنُودِ","Ist zu dir die Geschichte der Heerscharen gekommen"],["فِرۡعَوۡنَ وَثَمُودَ","Fir’auns und der Tamud"],["بَلِ ٱلَّذِينَ كَفَرُواْ فِي تَكۡذِيبࣲ","Aber nein! Diejenigen, die ungläubig sind, sind dem Leugnen (der Botschaft) verhaftet"],["وَٱللَّهُ مِن وَرَآئِهِم مُّحِيطُۢ","Doch Allah ist hinter ihnen her, (sie) umfassend"],["بَلۡ هُوَ قُرۡءَانࣱ مَّجِيدࣱ","Nein! Vielmehr ist es ein ruhmvoller Qur’an"],["فِي لَوۡحࣲ مَّحۡفُوظِۭ","auf einer wohlbehüteten Tafel"]]},{"n":84,"ar":"الانْشِقَاق","tr":"Al-Inschiqāq","de":"Das Zerreißen","v":[["إِذَا ٱلسَّمَآءُ ٱنشَقَّتۡ","Wenn der Himmel sich spaltet"],["وَأَذِنَتۡ لِرَبِّهَا وَحُقَّتۡ","und auf seinen Herrn hört - und es ist ja rechtens für ihn"],["وَإِذَا ٱلۡأَرۡضُ مُدَّتۡ","und wenn die Erde ausgedehnt wird"],["وَأَلۡقَتۡ مَا فِيهَا وَتَخَلَّتۡ","und herauswirft, was in ihr ist, und sich entleert"],["وَأَذِنَتۡ لِرَبِّهَا وَحُقَّتۡ","und auf ihren Herrn hört - und es ist ja rechtens für sie"],["يَٰٓأَيُّهَا ٱلۡإِنسَٰنُ إِنَّكَ كَادِحٌ إِلَىٰ رَبِّكَ كَدۡحࣰ ا فَمُلَٰقِيهِ","O du Mensch, du mühst dich hart zu deinem Herrn hin, und so wirst du Ihm begegnen"],["فَأَمَّا مَنۡ أُوتِيَ كِتَٰبَهُۥ بِيَمِينِهِۦ","Was nun jemanden angeht, dem dann sein Buch in seine Rechte gegeben wird"],["فَسَوۡفَ يُحَاسَبُ حِسَابࣰ ا يَسِيرࣰ ا","der wird einer leichten Abrechnung unterzogen"],["وَيَنقَلِبُ إِلَىٰٓ أَهۡلِهِۦ مَسۡرُورࣰ ا","und er wird erfreut zu seinen Angehörigen zurückkehren"],["وَأَمَّا مَنۡ أُوتِيَ كِتَٰبَهُۥ وَرَآءَ ظَهۡرِهِۦ","Was aber jemanden angeht, dem sein Buch hinter seinem Rücken gegeben wird"],["فَسَوۡفَ يَدۡعُواْ ثُبُورࣰ ا","der wird nach Vernichtung rufen"],["وَيَصۡلَىٰ سَعِيرًا","und der Feuerglut ausgesetzt sein"],["إِنَّهُۥ كَانَ فِيٓ أَهۡلِهِۦ مَسۡرُورًا","Er war ja froh inmitten seiner Angehörigen"],["إِنَّهُۥ ظَنَّ أَن لَّن يَحُورَ","Er meinte ja, daß er nicht zurückkehren würde"],["بَلَىٰٓۚ إِنَّ رَبَّهُۥ كَانَ بِهِۦ بَصِيرࣰ ا","Ja doch! Gewiß, sein Herr sieht ihn wohl"],["فَلَآ أُقۡسِمُ بِٱلشَّفَقِ","Nein! Ich schwöre beim Abendrot"],["وَٱلَّيۡلِ وَمَا وَسَقَ","und der Nacht und dem, was sie zusammentreibt"],["وَٱلۡقَمَرِ إِذَا ٱتَّسَقَ","und dem Mond, wenn er voll geworden ist"],["لَتَرۡكَبُنَّ طَبَقًا عَن طَبَقࣲ","Ihr werdet eine Schicht nach der anderen besteigen"],["فَمَا لَهُمۡ لَا يُؤۡمِنُونَ","Was ist denn mit ihnen, daß sie nicht glauben"],["وَإِذَا قُرِئَ عَلَيۡهِمُ ٱلۡقُرۡءَانُ لَا يَسۡجُدُونَۤ۩","und, wenn ihnen der Qur’an vorgelesen wird, sich nicht niederwerfen"],["بَلِ ٱلَّذِينَ كَفَرُواْ يُكَذِّبُونَ","Aber nein! Diejenigen, die ungläubig sind, erklären (ihn) für Lüge"],["وَٱللَّهُ أَعۡلَمُ بِمَا يُوعُونَ","Doch Allah weiß sehr wohl, was sie (in ihren Herzen) für sich behalten"],["فَبَشِّرۡهُم بِعَذَابٍ أَلِيمٍ","So verkünde ihnen schmerzhafte Strafe"],["إِلَّا ٱلَّذِينَ ءَامَنُواْ وَعَمِلُواْ ٱلصَّٰلِحَٰتِ لَهُمۡ أَجۡرٌ غَيۡرُ مَمۡنُونِۭ","außer denjenigen, die glauben und rechtschaffene Werke tun; für sie wird es einen Lohn geben, der nicht aufhört"]]},{"n":83,"ar":"المُطَفِّفِين","tr":"Al-Muṭaffifīn","de":"Die das Maß kürzen","v":[["وَيۡلࣱ لِّلۡمُطَفِّفِينَ","Wehe den das Maß Kürzenden"],["ٱلَّذِينَ إِذَا ٱكۡتَالُواْ عَلَى ٱلنَّاسِ يَسۡتَوۡفُونَ","die, wenn sie sich von den Menschen zumessen lassen, sich volles Maß geben lassen"],["وَإِذَا كَالُوهُمۡ أَو وَّزَنُوهُمۡ يُخۡسِرُونَ","wenn sie ihnen aber zumessen oder wägen, Verlust zufügen"],["أَلَا يَظُنُّ أُوْلَٰٓئِكَ أَنَّهُم مَّبۡعُوثُونَ","Glauben jene nicht, daß sie auferweckt werden"],["لِيَوۡمٍ عَظِيمࣲ","zu einem gewaltigen Tag"],["يَوۡمَ يَقُومُ ٱلنَّاسُ لِرَبِّ ٱلۡعَٰلَمِينَ","am Tag, da die Menschen sich um des Herrn der Weltenbewohner willen aufstellen werden"],["كَلَّآ إِنَّ كِتَٰبَ ٱلۡفُجَّارِ لَفِي سِجِّينࣲ","Keineswegs! Das Buch der Sittenlosen ist wahrlich in Siggin"],["وَمَآ أَدۡرَىٰكَ مَا سِجِّينࣱ","Und was läßt dich wissen, was Siggin ist"],["كِتَٰبࣱ مَّرۡقُومࣱ","(Es ist) ein Buch mit festen Eintragungen"],["وَيۡلࣱ يَوۡمَئِذࣲ لِّلۡمُكَذِّبِينَ","Wehe an jenem Tag den Leugnern"],["ٱلَّذِينَ يُكَذِّبُونَ بِيَوۡمِ ٱلدِّينِ","die den Tag des Gerichts für Lüge erklären"],["وَمَا يُكَذِّبُ بِهِۦٓ إِلَّا كُلُّ مُعۡتَدٍ أَثِيمٍ","Und nur derjenige erklärt ihn für Lüge, der Übertretungen begeht und ein Sünder ist"],["إِذَا تُتۡلَىٰ عَلَيۡهِ ءَايَٰتُنَا قَالَ أَسَٰطِيرُ ٱلۡأَوَّلِينَ","Wenn ihm Unsere Zeichen verlesen werden, sagt er: (Es sind) Fabeln der Früheren"],["كَلَّاۖ بَلۡۜ رَانَ عَلَىٰ قُلُوبِهِم مَّا كَانُواْ يَكۡسِبُونَ","Keineswegs! Vielmehr hat sich das, was sie zu erwerben pflegten, über ihren Herzen angesetzt"],["كَلَّآ إِنَّهُمۡ عَن رَّبِّهِمۡ يَوۡمَئِذࣲ لَّمَحۡجُوبُونَ","Keineswegs! Sie werden von ihrem Herrn an jenem Tag bestimmt abgeschirmt sein"],["ثُمَّ إِنَّهُمۡ لَصَالُواْ ٱلۡجَحِيمِ","Hierauf werden sie bestimmt dem Höllenbrand ausgesetzt sein"],["ثُمَّ يُقَالُ هَٰذَا ٱلَّذِي كُنتُم بِهِۦ تُكَذِّبُونَ","Hierauf wird gesagt werden: Das ist das, was ihr für Lüge zu erklären pflegtet"],["كَلَّآ إِنَّ كِتَٰبَ ٱلۡأَبۡرَارِ لَفِي عِلِّيِّينَ","Keineswegs! Das Buch der Frommen ist wahrlich in ’Illiyyin"],["وَمَآ أَدۡرَىٰكَ مَا عِلِّيُّونَ","Und was läßt dich wissen, was ’Illiyyun ist"],["كِتَٰبࣱ مَّرۡقُومࣱ","(Es ist) ein Buch mit festen Eintragungen"],["يَشۡهَدُهُ ٱلۡمُقَرَّبُونَ","in das die (Allah) Nahegestellten Einsicht nehmen"],["إِنَّ ٱلۡأَبۡرَارَ لَفِي نَعِيمٍ","Die Frommen werden wahrlich in Wonne sein"],["عَلَى ٱلۡأَرَآئِكِ يَنظُرُونَ","auf überdachten Liegen (gelehnt), und blicken um sich"],["تَعۡرِفُ فِي وُجُوهِهِمۡ نَضۡرَةَ ٱلنَّعِيمِ","Du erkennst in ihren Gesichtern das Strahlen der Wonne"],["يُسۡقَوۡنَ مِن رَّحِيقࣲ مَّخۡتُومٍ","Ihnen wird von versiegeltem Nektar zu trinken gegeben"],["خِتَٰمُهُۥ مِسۡكࣱۚ وَفِي ذَٰلِكَ فَلۡيَتَنَافَسِ ٱلۡمُتَنَٰفِسُونَ","dessen Siegel Moschus ist -, und darum sollen die Wettbewerber wettkämpfen"],["وَمِزَاجُهُۥ مِن تَسۡنِيمٍ","und dessen Beimischung Tasnim ist"],["عَيۡنࣰ ا يَشۡرَبُ بِهَا ٱلۡمُقَرَّبُونَ","aus einer Quelle, aus der die (Allah) Nahegestellten trinken"],["إِنَّ ٱلَّذِينَ أَجۡرَمُواْ كَانُواْ مِنَ ٱلَّذِينَ ءَامَنُواْ يَضۡحَكُونَ","Gewiß, diejenigen, die Übeltaten begingen, pflegten über diejenigen zu lachen, die glauben"],["وَإِذَا مَرُّواْ بِهِمۡ يَتَغَامَزُونَ","und, wenn sie an ihnen vorbeikamen, einander zuzuzwinkern"],["وَإِذَا ٱنقَلَبُوٓاْ إِلَىٰٓ أَهۡلِهِمُ ٱنقَلَبُواْ فَكِهِينَ","Und, wenn sie zu ihren Angehörigen zurückkehrten, kehrten sie zurück, indem sie es sich wohl sein ließen"],["وَإِذَا رَأَوۡهُمۡ قَالُوٓاْ إِنَّ هَٰٓؤُلَآءِ لَضَآلُّونَ","Und, wenn sie sie sahen, sagten sie: Diese gehen fürwahr in die Irre"],["وَمَآ أُرۡسِلُواْ عَلَيۡهِمۡ حَٰفِظِينَ","Dabei waren sie doch nicht als Hüter über sie gesandt worden"],["فَٱلۡيَوۡمَ ٱلَّذِينَ ءَامَنُواْ مِنَ ٱلۡكُفَّارِ يَضۡحَكُونَ","Heute aber lachen diejenigen, die glauben, über die Ungläubigen"],["عَلَى ٱلۡأَرَآئِكِ يَنظُرُونَ","auf überdachten Liegen (gelehnt), und blicken um sich"],["هَلۡ ثُوِّبَ ٱلۡكُفَّارُ مَا كَانُواْ يَفۡعَلُونَ","Sind die Ungläubigen nicht doch belohnt worden für das, was sie zu tun pflegten"]]},{"n":82,"ar":"الانْفِطَار","tr":"Al-Infiṭār","de":"Das Zerbrechen","v":[["إِذَا ٱلسَّمَآءُ ٱنفَطَرَتۡ","Wenn der Himmel zerbricht"],["وَإِذَا ٱلۡكَوَاكِبُ ٱنتَثَرَتۡ","und wenn die Sterne sich zerstreuen"],["وَإِذَا ٱلۡبِحَارُ فُجِّرَتۡ","und wenn die Meere gesprengt werden"],["وَإِذَا ٱلۡقُبُورُ بُعۡثِرَتۡ","und wenn die Gräber durchwühlt werden"],["عَلِمَتۡ نَفۡسࣱ مَّا قَدَّمَتۡ وَأَخَّرَتۡ","wird eine (jede) Seele erfahren, was sie vorausgeschickt und zurückgestellt hat"],["يَٰٓأَيُّهَا ٱلۡإِنسَٰنُ مَا غَرَّكَ بِرَبِّكَ ٱلۡكَرِيمِ","O Mensch, was hat dich hinsichtlich deines edelmütigen Herrn getäuscht"],["ٱلَّذِي خَلَقَكَ فَسَوَّىٰكَ فَعَدَلَكَ","Der dich erschaffen und da(bei) zurechtgeformt und wohlgebildet gemacht hat"],["فِيٓ أَيِّ صُورَةࣲ مَّا شَآءَ رَكَّبَكَ","und dich, in welcher Gestalt Er wollte, zusammengefügt hat"],["كَلَّا بَلۡ تُكَذِّبُونَ بِٱلدِّينِ","Keineswegs! Vielmehr erklärt ihr das Gericht für Lüge"],["وَإِنَّ عَلَيۡكُمۡ لَحَٰفِظِينَ","Über euch sind wahrlich Hüter (eingesetzt)"],["كِرَامࣰ ا كَٰتِبِينَ","edle, die (alles) aufschreiben"],["يَعۡلَمُونَ مَا تَفۡعَلُونَ","und die wissen, was ihr tut"],["إِنَّ ٱلۡأَبۡرَارَ لَفِي نَعِيمࣲ","Die Frommen werden wahrlich in Wonne sein"],["وَإِنَّ ٱلۡفُجَّارَ لَفِي جَحِيمࣲ","Und die Sittenlosen werden wahrlich in einem Höllenbrand sein"],["يَصۡلَوۡنَهَا يَوۡمَ ٱلدِّينِ","dem sie am Tag des Gerichts ausgesetzt werden"],["وَمَا هُمۡ عَنۡهَا بِغَآئِبِينَ","und dem sie nicht abwesend sein werden"],["وَمَآ أَدۡرَىٰكَ مَا يَوۡمُ ٱلدِّينِ","Und was läßt dich wissen, was der Tag des Gerichts ist"],["ثُمَّ مَآ أَدۡرَىٰكَ مَا يَوۡمُ ٱلدِّينِ","Abermals: Was läßt dich wissen, was der Tag des Gerichts ist"],["يَوۡمَ لَا تَمۡلِكُ نَفۡسࣱ لِّنَفۡسࣲ شَيۡـࣰٔ اۖ وَٱلۡأَمۡرُ يَوۡمَئِذࣲ لِّلَّهِ","Am Tag, da keine Seele für eine (andere) Seele etwas (auszurichten) vermag; und der Befehl wird an jenem Tag Allah (allein) zustehen"]]},{"n":81,"ar":"التَّكْوِير","tr":"At-Takwīr","de":"Das Umwickeln","v":[["إِذَا ٱلشَّمۡسُ كُوِّرَتۡ","Wenn die Sonne umschlungen wird’"],["وَإِذَا ٱلنُّجُومُ ٱنكَدَرَتۡ","und wenn die Sterne verstreut werden"],["وَإِذَا ٱلۡجِبَالُ سُيِّرَتۡ","und wenn die Berge versetzt werden"],["وَإِذَا ٱلۡعِشَارُ عُطِّلَتۡ","und wenn die trächtigen Kamelstuten vernachlässigt werden"],["وَإِذَا ٱلۡوُحُوشُ حُشِرَتۡ","und wenn die wilden Tiere versammelt werden"],["وَإِذَا ٱلۡبِحَارُ سُجِّرَتۡ","und wenn die Meere zum Überfließen gebracht werden"],["وَإِذَا ٱلنُّفُوسُ زُوِّجَتۡ","und wenn die Seelen gepaart werden"],["وَإِذَا ٱلۡمَوۡءُۥدَةُ سُئِلَتۡ","und wenn das lebendig begrabene Mädchen gefragt wird"],["بِأَيِّ ذَنۢبࣲ قُتِلَتۡ","wegen welcher Sünde es getötet wurde"],["وَإِذَا ٱلصُّحُفُ نُشِرَتۡ","und wenn die Blätter aufgeschlagen werden"],["وَإِذَا ٱلسَّمَآءُ كُشِطَتۡ","und wenn der Himmel abgezogen wird"],["وَإِذَا ٱلۡجَحِيمُ سُعِّرَتۡ","und wenn die Hölle angefacht wird"],["وَإِذَا ٱلۡجَنَّةُ أُزۡلِفَتۡ","und wenn der (Paradies)garten nahe herangebracht wird"],["عَلِمَتۡ نَفۡسࣱ مَّآ أَحۡضَرَتۡ","wird eine (jede) Seele erfahren, was sie vorgebracht hat"],["فَلَآ أُقۡسِمُ بِٱلۡخُنَّسِ","Nein! Ich schwöre bei den sich Verbergenden"],["ٱلۡجَوَارِ ٱلۡكُنَّسِ","den Dahinziehenden und sich wieder Zeigenden"],["وَٱلَّيۡلِ إِذَا عَسۡعَسَ","und bei der Nacht, wenn sie anbricht"],["وَٱلصُّبۡحِ إِذَا تَنَفَّسَ","und bei dem Morgen, wenn er Atem schöpft"],["إِنَّهُۥ لَقَوۡلُ رَسُولࣲ كَرِيمࣲ","Dies sind wahrlich die Worte eines edlen Gesandten"],["ذِي قُوَّةٍ عِندَ ذِي ٱلۡعَرۡشِ مَكِينࣲ","Besitzer von Kraft und beim Herrn des Thrones in Ansehen"],["مُّطَاعࣲ ثَمَّ أَمِينࣲ","dem man dort gehorcht und (der) vertrauenswürdig (ist)"],["وَمَا صَاحِبُكُم بِمَجۡنُونࣲ","Und euer Gefährte ist kein Besessener"],["وَلَقَدۡ رَءَاهُ بِٱلۡأُفُقِ ٱلۡمُبِينِ","Er hat ihn ja am deutlichen Gesichtskreis gesehen"],["وَمَا هُوَ عَلَى ٱلۡغَيۡبِ بِضَنِينࣲ","und er hält nicht aus Geiz das Verborgene zurück"],["وَمَا هُوَ بِقَوۡلِ شَيۡطَٰنࣲ رَّجِيمࣲ","Und es sind nicht die Worte eines gesteinigten Satans"],["فَأَيۡنَ تَذۡهَبُونَ","Wo geht ihr denn hin"],["إِنۡ هُوَ إِلَّا ذِكۡرࣱ لِّلۡعَٰلَمِينَ","Es ist nur eine Ermahnung für die Weltenbewohner"],["لِمَن شَآءَ مِنكُمۡ أَن يَسۡتَقِيمَ","für jemanden von euch, der sich recht verhalten will"],["وَمَا تَشَآءُونَ إِلَّآ أَن يَشَآءَ ٱللَّهُ رَبُّ ٱلۡعَٰلَمِينَ","Und ihr könnt nicht wollen, außer daß Allah will, (Er), der Herr der Weltenbewohner"]]},{"n":80,"ar":"عَبَسَ","tr":"ʿAbasa","de":"Er runzelte die Stirn","v":[["عَبَسَ وَتَوَلَّىٰٓ","Er blickte düster und kehrte sich ab"],["أَن جَآءَهُ ٱلۡأَعۡمَىٰ","weil der Blinde zu ihm kam"],["وَمَا يُدۡرِيكَ لَعَلَّهُۥ يَزَّكَّىٰٓ","Was läßt dich wissen, vielleicht läutert er sich"],["أَوۡ يَذَّكَّرُ فَتَنفَعَهُ ٱلذِّكۡرَىٰٓ","oder bedenkt, so daß ihm die Ermahnung nützt"],["أَمَّا مَنِ ٱسۡتَغۡنَىٰ","Was nun jemanden angeht, der sich für unbedürftig hält"],["فَأَنتَ لَهُۥ تَصَدَّىٰ","so widmest du dich ihm"],["وَمَا عَلَيۡكَ أَلَّا يَزَّكَّىٰ","obgleich es dich nicht zu kümmern hat, daß er sich nicht läutern will"],["وَأَمَّا مَن جَآءَكَ يَسۡعَىٰ","Was aber jemanden angeht, der zu dir geeilt kommt"],["وَهُوَ يَخۡشَىٰ","und dabei gottesfürchtig ist"],["فَأَنتَ عَنۡهُ تَلَهَّىٰ","von dem läßt du dich ablenken"],["كَلَّآ إِنَّهَا تَذۡكِرَةࣱ","Keineswegs! Gewiß, es ist eine Erinnerung"],["فَمَن شَآءَ ذَكَرَهُۥ","Wer nun will, gedenkt seiner"],["فِي صُحُفࣲ مُّكَرَّمَةࣲ","(Er steht) auf in Ehren gehaltenen Blättern"],["مَّرۡفُوعَةࣲ مُّطَهَّرَةِۭ","erhöhten und rein gehaltenen"],["بِأَيۡدِي سَفَرَةࣲ","durch die Hände von Entsandten"],["كِرَامِۭ بَرَرَةࣲ","edlen, frommen"],["قُتِلَ ٱلۡإِنسَٰنُ مَآ أَكۡفَرَهُۥ","Tod dem Menschen, wie undankbar er ist"],["مِنۡ أَيِّ شَيۡءٍ خَلَقَهُۥ","Woraus hat Er ihn erschaffen"],["مِن نُّطۡفَةٍ خَلَقَهُۥ فَقَدَّرَهُۥ","Aus einem Samentropfen hat Er ihn erschaffen und ihm dabei sein Maß festgesetzt"],["ثُمَّ ٱلسَّبِيلَ يَسَّرَهُۥ","Den Weg hierauf macht Er ihm leicht"],["ثُمَّ أَمَاتَهُۥ فَأَقۡبَرَهُۥ","Hierauf läßt Er ihn sterben und bringt ihn dann ins Grab"],["ثُمَّ إِذَا شَآءَ أَنشَرَهُۥ","Hierauf, wenn Er will, läßt Er ihn auferstehen"],["كَلَّا لَمَّا يَقۡضِ مَآ أَمَرَهُۥ","Keineswegs! Er hat noch nicht ausgeführt, was Er ihm befohlen hat"],["فَلۡيَنظُرِ ٱلۡإِنسَٰنُ إِلَىٰ طَعَامِهِۦٓ","So schaue der Mensch doch auf seine Nahrung"],["أَنَّا صَبَبۡنَا ٱلۡمَآءَ صَبࣰّ ا","Wir gießen ja Güsse von Wasser"],["ثُمَّ شَقَقۡنَا ٱلۡأَرۡضَ شَقࣰّ ا","hierauf spalten Wir die Erde in Spalten auf"],["فَأَنۢبَتۡنَا فِيهَا حَبࣰّ ا","und lassen dann auf ihr Korn wachsen"],["وَعِنَبࣰ ا وَقَضۡبࣰ ا","und Rebstöcke und Grünzeug"],["وَزَيۡتُونࣰ ا وَنَخۡلࣰ ا","und Ölbäume und Palmen"],["وَحَدَآئِقَ غُلۡبࣰ ا","und Gärten mit dicken Bäumen"],["وَفَٰكِهَةࣰ وَأَبࣰّ ا","und Früchte und Futter"],["مَّتَٰعࣰ ا لَّكُمۡ وَلِأَنۡعَٰمِكُمۡ","als Nießbrauch für euch und für euer Vieh"],["فَإِذَا جَآءَتِ ٱلصَّآخَّةُ","Wenn dann der betäubende (Schrei) kommt"],["يَوۡمَ يَفِرُّ ٱلۡمَرۡءُ مِنۡ أَخِيهِ","am Tag, da der Mensch flieht vor seinem Bruder"],["وَأُمِّهِۦ وَأَبِيهِ","und seiner Mutter und seinem Vater"],["وَصَٰحِبَتِهِۦ وَبَنِيهِ","und seiner Gefährtin und seinen Söhnen"],["لِكُلِّ ٱمۡرِيࣲٕ مِّنۡهُمۡ يَوۡمَئِذࣲ شَأۡنࣱ يُغۡنِيهِ","jedermann von ihnen wird an jenem Tag eine Angelegenheit haben, die ihn beschäftigt"],["وُجُوهࣱ يَوۡمَئِذࣲ مُّسۡفِرَةࣱ","(Die einen) Gesichter werden an jenem Tag erstrahlen"],["ضَاحِكَةࣱ مُّسۡتَبۡشِرَةࣱ","lachen und sich freuen"],["وَوُجُوهࣱ يَوۡمَئِذٍ عَلَيۡهَا غَبَرَةࣱ","Und auf (den anderen) Gesichtern wird an jenem Tag Staub sein"],["تَرۡهَقُهَا قَتَرَةٌ","und sie werden von Dunkelheit bedeckt sein"],["أُوْلَٰٓئِكَ هُمُ ٱلۡكَفَرَةُ ٱلۡفَجَرَةُ","Das sind die Ungläubigen und Sittenlosen"]]},{"n":79,"ar":"النَّازِعَات","tr":"An-Nāziʿāt","de":"Die Entreißenden","v":[["وَٱلنَّٰزِعَٰتِ غَرۡقࣰ ا","Bei den mit Heftigkeit Entreißenden"],["وَٱلنَّٰشِطَٰتِ نَشۡطࣰ ا","und den leicht Herausziehenden"],["وَٱلسَّٰبِحَٰتِ سَبۡحࣰ ا","und den unbeschwert Dahingleitenden"],["فَٱلسَّٰبِقَٰتِ سَبۡقࣰ ا","den allem Vorauseilenden"],["فَٱلۡمُدَبِّرَٰتِ أَمۡرࣰ ا","den eine Angelegenheit Regelnden"],["يَوۡمَ تَرۡجُفُ ٱلرَّاجِفَةُ","Am Tag, da das Zittern einsetzt"],["تَتۡبَعُهَا ٱلرَّادِفَةُ","und das nächste hinterherfolgt"],["قُلُوبࣱ يَوۡمَئِذࣲ وَاجِفَةٌ","(gewisse) Herzen werden an jenem Tag beunruhigt klopfen"],["أَبۡصَٰرُهَا خَٰشِعَةࣱ","und ihre Blicke werden demütig sein"],["يَقُولُونَ أَءِنَّا لَمَرۡدُودُونَ فِي ٱلۡحَافِرَةِ","Sie sagen: Sollen wir denn wirklich aus den Gräbern zurückgebracht werden"],["أَءِذَا كُنَّا عِظَٰمࣰ ا نَّخِرَةࣰ","Wenn wir zu verrotteten Knochen geworden sind"],["قَالُواْ تِلۡكَ إِذࣰ ا كَرَّةٌ خَاسِرَةࣱ","Sie sagen: Das wäre dann eine verlustreiche Wiederkehr"],["فَإِنَّمَا هِيَ زَجۡرَةࣱ وَٰحِدَةࣱ","Es wird nur ein einziger erschreckender Schrei sein"],["فَإِذَا هُم بِٱلسَّاهِرَةِ","und sogleich sind sie auf der Oberfläche"],["هَلۡ أَتَىٰكَ حَدِيثُ مُوسَىٰٓ","Ist zu dir die Geschichte Musas gekommen"],["إِذۡ نَادَىٰهُ رَبُّهُۥ بِٱلۡوَادِ ٱلۡمُقَدَّسِ طُوًى","Als sein Herr ihn im geheiligten Tal Tuwa rief"],["ٱذۡهَبۡ إِلَىٰ فِرۡعَوۡنَ إِنَّهُۥ طَغَىٰ","Geh zu Fir’aun, denn gewiß, er überschreitet das Maß (an Frevel)"],["فَقُلۡ هَل لَّكَ إِلَىٰٓ أَن تَزَكَّىٰ","Dann sag: Hast du (nicht) den Wunsch, dich zu läutern"],["وَأَهۡدِيَكَ إِلَىٰ رَبِّكَ فَتَخۡشَىٰ","und daß ich dich zu deinem Herrn rechtleite, so daß du gottesfürchtig wirst"],["فَأَرَىٰهُ ٱلۡأٓيَةَ ٱلۡكُبۡرَىٰ","Da zeigte er ihm das größte Zeichen"],["فَكَذَّبَ وَعَصَىٰ","Er aber erklärte (es) für Lüge und widersetzte sich"],["ثُمَّ أَدۡبَرَ يَسۡعَىٰ","Hierauf kehrte er den Rücken und ging eilig weg’"],["فَحَشَرَ فَنَادَىٰ","Da versammelte er (das Volk) und rief dann aus"],["فَقَالَ أَنَا۠ رَبُّكُمُ ٱلۡأَعۡلَىٰ","Er sagte: Ich bin euer höchster Herr"],["فَأَخَذَهُ ٱللَّهُ نَكَالَ ٱلۡأٓخِرَةِ وَٱلۡأُولَىٰٓ","Da ergriff Allah ihn als warnendes Beispiel für das Jenseits und das Diesseits"],["إِنَّ فِي ذَٰلِكَ لَعِبۡرَةࣰ لِّمَن يَخۡشَىٰٓ","Darin ist wahrlich eine Lehre für jemanden, der gottesfürchtig ist"],["ءَأَنتُمۡ أَشَدُّ خَلۡقًا أَمِ ٱلسَّمَآءُۚ بَنَىٰهَا","Seid etwa ihr schwerer zu erschaffen oder der Himmel? - Er hat ihn aufgebaut"],["رَفَعَ سَمۡكَهَا فَسَوَّىٰهَا","Er hat seinen höchsten Teil emporgehoben und ihn dann zurechtgeformt"],["وَأَغۡطَشَ لَيۡلَهَا وَأَخۡرَجَ ضُحَىٰهَا","Und Er hat seine Nacht finster gemacht und seine Morgenhelle hervorkommen lassen"],["وَٱلۡأَرۡضَ بَعۡدَ ذَٰلِكَ دَحَىٰهَآ","Und die Erde, Er hat sie danach hingebreitet"],["أَخۡرَجَ مِنۡهَا مَآءَهَا وَمَرۡعَىٰهَا","Er hat aus ihr ihr Wasser und ihre Weide hervorkommen lassen"],["وَٱلۡجِبَالَ أَرۡسَىٰهَا","Und die Berge, Er hat sie fest gegründet"],["مَتَٰعࣰ ا لَّكُمۡ وَلِأَنۡعَٰمِكُمۡ","(Dies) als Nießbrauch für euch und für euer Vieh"],["فَإِذَا جَآءَتِ ٱلطَّآمَّةُ ٱلۡكُبۡرَىٰ","Wenn dann der größte, überwältigende Umsturz kommt"],["يَوۡمَ يَتَذَكَّرُ ٱلۡإِنسَٰنُ مَا سَعَىٰ","am Tag, da der Mensch das bedenkt, worum er sich bemüht hat"],["وَبُرِّزَتِ ٱلۡجَحِيمُ لِمَن يَرَىٰ","und zum Erscheinen gebracht wird der Höllenbrand für (je)den, der sieht"],["فَأَمَّا مَن طَغَىٰ","was den (denjenigen) angeht, wer das Maß (an Frevel) überschritten"],["وَءَاثَرَ ٱلۡحَيَوٰةَ ٱلدُّنۡيَا","und das diesseitige Leben vorgezogen hat"],["فَإِنَّ ٱلۡجَحِيمَ هِيَ ٱلۡمَأۡوَىٰ","gewiß, so wird der Höllenbrand (ihm) Zufluchtsort sein"],["وَأَمَّا مَنۡ خَافَ مَقَامَ رَبِّهِۦ وَنَهَى ٱلنَّفۡسَ عَنِ ٱلۡهَوَىٰ","Was aber jemanden angeht, der den Stand seines Herrn gefürchtet und seiner Seele die (bösen) Neigungen untersagt hat"],["فَإِنَّ ٱلۡجَنَّةَ هِيَ ٱلۡمَأۡوَىٰ","so wird der (Paradies)garten (ihm) Zufluchtsort sein"],["يَسۡـَٔلُونَكَ عَنِ ٱلسَّاعَةِ أَيَّانَ مُرۡسَىٰهَا","Sie fragen dich nach der Stunde, wann sie bloß feststehen wird"],["فِيمَ أَنتَ مِن ذِكۡرَىٰهَآ","Was hast du über sie zu erwähnen"],["إِلَىٰ رَبِّكَ مُنتَهَىٰهَآ","Zu deinem Herrn ist ihr Endziel"],["إِنَّمَآ أَنتَ مُنذِرُ مَن يَخۡشَىٰهَا","Du bist nur ein Überbringer von Warnungen für jemanden, der sie fürchtet"],["كَأَنَّهُمۡ يَوۡمَ يَرَوۡنَهَا لَمۡ يَلۡبَثُوٓاْ إِلَّا عَشِيَّةً أَوۡ ضُحَىٰهَا","Am Tag, da sie sie sehen, wird ihnen sein, als hätten sie nur einen Nachmittag verweilt oder seinen (dazugehörigen) Vormittag"]]},{"n":78,"ar":"النَّبَأ","tr":"An-Nabaʾ","de":"Die Kunde","v":[["عَمَّ يَتَسَآءَلُونَ","Wonach fragen sie sich"],["عَنِ ٱلنَّبَإِ ٱلۡعَظِيمِ","Nach der gewaltigen Kunde"],["ٱلَّذِي هُمۡ فِيهِ مُخۡتَلِفُونَ","über die sie sich uneinig sind"],["كَلَّا سَيَعۡلَمُونَ","Keineswegs! Sie werden (es noch) erfahren"],["ثُمَّ كَلَّا سَيَعۡلَمُونَ","Abermals: Keineswegs! Sie werden (es noch) erfahren"],["أَلَمۡ نَجۡعَلِ ٱلۡأَرۡضَ مِهَٰدࣰ ا","Haben Wir nicht die Erde zu einer Lagerstatt gemacht"],["وَٱلۡجِبَالَ أَوۡتَادࣰ ا","und die Berge zu Pfählen"],["وَخَلَقۡنَٰكُمۡ أَزۡوَٰجࣰ ا","Und Wir haben euch als Paare erschaffen"],["وَجَعَلۡنَا نَوۡمَكُمۡ سُبَاتࣰ ا","Und Wir haben euren Schlaf zum Ausruhen gemacht"],["وَجَعَلۡنَا ٱلَّيۡلَ لِبَاسࣰ ا","Und Wir haben die Nacht zum Kleid gemacht"],["وَجَعَلۡنَا ٱلنَّهَارَ مَعَاشࣰ ا","Und Wir haben den Tag zur Lebensführung gemacht"],["وَبَنَيۡنَا فَوۡقَكُمۡ سَبۡعࣰ ا شِدَادࣰ ا","Und Wir haben über euch sieben feste (Himmel) aufgebaut"],["وَجَعَلۡنَا سِرَاجࣰ ا وَهَّاجࣰ ا","Und Wir haben einen hell glühenden Leuchtkörper gemacht"],["وَأَنزَلۡنَا مِنَ ٱلۡمُعۡصِرَٰتِ مَآءࣰ ثَجَّاجࣰ ا","Und Wir haben von den Regenwolken sich ergießendes Wasser herabkommen lassen"],["لِّنُخۡرِجَ بِهِۦ حَبࣰّ ا وَنَبَاتࣰ ا","um damit Korn und Gewächse hervorzubringen"],["وَجَنَّٰتٍ أَلۡفَافًا","und dichtbestandene Gärten"],["إِنَّ يَوۡمَ ٱلۡفَصۡلِ كَانَ مِيقَٰتࣰ ا","Gewiß, der Tag der Entscheidung ist eine festgesetzte Zeit"],["يَوۡمَ يُنفَخُ فِي ٱلصُّورِ فَتَأۡتُونَ أَفۡوَاجࣰ ا","der Tag, da ins Horn geblasen wird und ihr in Scharen herkommt"],["وَفُتِحَتِ ٱلسَّمَآءُ فَكَانَتۡ أَبۡوَٰبࣰ ا","und da der Himmel geöffnet und dann zu Toren wird"],["وَسُيِّرَتِ ٱلۡجِبَالُ فَكَانَتۡ سَرَابًا","und da die Berge versetzt und dann zu einer Luftspiegelung werden"],["إِنَّ جَهَنَّمَ كَانَتۡ مِرۡصَادࣰ ا","Gewiß, die Hölle ist ein Hinterhalt"],["لِّلطَّٰغِينَ مَـَٔابࣰ ا","für diejenigen, die das Maß (an Frevel) überschreiten, eine Heimstatt"],["لَّٰبِثِينَ فِيهَآ أَحۡقَابࣰ ا","lange Zeiten darin zu verweilen"],["لَّا يَذُوقُونَ فِيهَا بَرۡدࣰ ا وَلَا شَرَابًا","sie werden darin weder Kühlung noch Getränk kosten"],["إِلَّا حَمِيمࣰ ا وَغَسَّاقࣰ ا","außer heißem Wasser und stinkender Brühe"],["جَزَآءࣰ وِفَاقًا","als angemessene Vergeltung"],["إِنَّهُمۡ كَانُواْ لَا يَرۡجُونَ حِسَابࣰ ا","Sie erwarteten ja niemals eine Abrechnung"],["وَكَذَّبُواْ بِـَٔايَٰتِنَا كِذَّابࣰ ا","und erklärten Unsere Zeichen hartnäckig für Lüge"],["وَكُلَّ شَيۡءٍ أَحۡصَيۡنَٰهُ كِتَٰبࣰ ا","Doch alles haben Wir schriftlich erfaßt"],["فَذُوقُواْ فَلَن نَّزِيدَكُمۡ إِلَّا عَذَابًا","So kostet; Wir werden euch nur die Strafe mehren"],["إِنَّ لِلۡمُتَّقِينَ مَفَازًا","Gewiß, für die Gottesfürchtigen wird es einen Ort des Erfolgs geben"],["حَدَآئِقَ وَأَعۡنَٰبࣰ ا","umfriedete Gärten und Rebstöcke"],["وَكَوَاعِبَ أَتۡرَابࣰ ا","und prächtige, gleichaltrige (weibliche Wesen)"],["وَكَأۡسࣰ ا دِهَاقࣰ ا","und ein (stets) voller Becher"],["لَّا يَسۡمَعُونَ فِيهَا لَغۡوࣰ ا وَلَا كِذَّٰبࣰ ا","Weder hören sie darin unbedachte Rede noch Lüge"],["جَزَآءࣰ مِّن رَّبِّكَ عَطَآءً حِسَابࣰ ا","(Dies) als Belohnung von deinem Herrn, als hinreichende Gabe"],["رَّبِّ ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضِ وَمَا بَيۡنَهُمَا ٱلرَّحۡمَٰنِۖ لَا يَمۡلِكُونَ مِنۡهُ خِطَابࣰ ا","dem Herrn der Himmel und der Erde und dessen, was dazwischen ist, dem Allerbarmer. Sie verfügen nicht darüber, vor Ihm zu reden"],["يَوۡمَ يَقُومُ ٱلرُّوحُ وَٱلۡمَلَٰٓئِكَةُ صَفࣰّ اۖ لَّا يَتَكَلَّمُونَ إِلَّا مَنۡ أَذِنَ لَهُ ٱلرَّحۡمَٰنُ وَقَالَ صَوَابࣰ ا","am Tag, da der Geist und die Engel in Reihe stehen. Sie werden nicht sprechen, außer wem der Allerbarmer es erlaubt und wer Richtiges sagt"],["ذَٰلِكَ ٱلۡيَوۡمُ ٱلۡحَقُّۖ فَمَن شَآءَ ٱتَّخَذَ إِلَىٰ رَبِّهِۦ مَـَٔابًا","Das ist der wahrhaftig (eintreffend)e Tag. Wer nun will, nimmt zu seinem Herrn eine Heimkehr"],["إِنَّآ أَنذَرۡنَٰكُمۡ عَذَابࣰ ا قَرِيبࣰ ا يَوۡمَ يَنظُرُ ٱلۡمَرۡءُ مَا قَدَّمَتۡ يَدَاهُ وَيَقُولُ ٱلۡكَافِرُ يَٰلَيۡتَنِي كُنتُ تُرَٰبَۢا","Wir warnen euch ja vor naher Strafe, am Tag, da der Mensch schauen wird, was seine Hände vorausgeschickt haben, und der Ungläubige sagen wird: O wäre ich doch Erde"]]}]
+;
+const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg>';
+const SPEAK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
+
+// Schreibwege in einem 100×100-Feld, in Schreibreihenfolge. "M x y l0.1 0" ist ein Punkt.
+const D = (x, y) => `M${x} ${y} l0.1 0`;
+const BA = "M80 44 C80 56 78 62 68 62 L32 62 C22 62 20 56 20 46";
+const HA = "M36 30 C46 26 58 26 66 30 C52 38 34 48 32 64 C30 80 52 88 72 80";
+const DAL = "M44 34 C54 42 62 50 60 60 C56 64 44 64 34 62";
+const RA = "M60 46 C62 58 58 70 36 80";
+const SIN = "M86 46 C86 56 84 60 78 60 C72 60 70 56 70 50 C70 58 68 60 62 60 C56 60 54 56 54 50 C54 64 50 74 38 76 C26 78 18 70 18 58";
+const SAD = "M58 56 C62 40 90 38 88 50 C86 58 72 58 58 56 C56 62 52 62 50 58 C50 70 46 78 34 78 C24 78 18 70 18 60";
+const TAA = "M28 62 C38 42 80 40 80 54 C80 64 52 62 28 62";
+const AIN = "M64 32 C58 22 42 24 42 34 C42 44 56 46 66 42 C50 48 36 56 36 68 C36 82 54 86 72 80";
+const FA = "M76 46 C66 38 58 48 66 54 C72 58 80 54 78 46 C78 56 76 62 66 62 L30 62 C22 62 20 56 20 48";
+const QAF = "M74 44 C64 36 56 46 64 52 C70 56 78 52 76 44 C78 58 76 72 60 78 C44 84 26 76 26 60";
+const WAW = "M66 52 C58 42 48 50 54 56 C60 62 68 58 66 50 C68 62 62 74 40 82";
+const AR_STROKES = [
+  ["M50 16 L50 66"],
+  [BA, D(50, 76)],
+  [BA, D(44, 42), D(56, 42)],
+  [BA, D(44, 44), D(56, 44), D(50, 33)],
+  [HA, D(50, 60)],
+  [HA],
+  [HA, D(50, 16)],
+  [DAL],
+  [DAL, D(46, 20)],
+  [RA],
+  [RA, D(60, 32)],
+  [SIN],
+  [SIN, D(64, 36), D(78, 36), D(71, 25)],
+  [SAD],
+  [SAD, D(72, 30)],
+  [TAA, "M42 16 L42 58"],
+  [TAA, "M42 16 L42 58", D(60, 34)],
+  [AIN],
+  [AIN, D(52, 14)],
+  [FA, D(70, 30)],
+  [QAF, D(62, 30), D(74, 30)],
+  ["M76 16 L76 56 C76 62 72 62 66 62 L30 62 C24 62 22 58 22 52", "M46 34 C54 30 58 38 50 42 C56 42 60 44 60 48"],
+  ["M64 14 L64 58 C64 76 50 82 38 78 C28 74 26 64 30 56"],
+  ["M62 52 C70 44 80 54 72 60 C66 64 56 62 54 56 C50 60 46 68 46 86"],
+  ["M70 46 C72 60 68 74 50 76 C34 76 26 66 30 52", D(50, 38)],
+  ["M50 30 C34 32 26 60 42 66 C56 72 72 62 68 48 C64 36 52 32 50 30 C46 42 44 54 54 56 C60 57 62 50 56 46"],
+  [WAW],
+  ["M72 40 C60 34 52 44 60 50 C68 56 78 58 72 66 C66 74 46 76 34 70 C26 64 28 56 34 52", D(46, 86), D(58, 86)]
+];
+// Deutsch: Großbuchstaben (Oberlinie 20, Grundlinie 80), Kleinbuchstaben (Mittellinie 45, Grundlinie 78)
+const O_UP = "M50 20 C22 20 22 80 50 80 C78 80 78 20 50 20";
+const P_UP = ["M32 20 L32 80", "M32 20 L56 20 C74 20 74 52 56 52 L32 52"];
+const A_UP = ["M50 20 L26 80", "M50 20 L74 80", "M35 58 L65 58"];
+const UPPER = {
+  A: A_UP, B: ["M32 20 L32 80", "M32 20 L56 20 C72 20 72 48 56 48 L32 48", "M32 48 L58 48 C76 48 76 80 58 80 L32 80"],
+  C: ["M70 30 C62 16 32 16 28 46 C26 76 58 88 72 70"], D: ["M32 20 L32 80", "M32 20 L48 20 C80 20 80 80 48 80 L32 80"],
+  E: ["M32 20 L32 80", "M32 20 L68 20", "M32 50 L62 50", "M32 80 L68 80"], F: ["M32 20 L32 80", "M32 20 L68 20", "M32 50 L62 50"],
+  G: ["M70 30 C62 16 32 16 28 46 C26 76 56 88 70 72 L70 56 L54 56"], H: ["M30 20 L30 80", "M70 20 L70 80", "M30 50 L70 50"],
+  I: ["M50 20 L50 80"], J: ["M60 20 L60 64 C60 86 34 86 32 70"], K: ["M32 20 L32 80", "M68 20 L32 54", "M44 44 L70 80"],
+  L: ["M34 20 L34 80 L68 80"], M: ["M24 80 L24 20 L50 60 L76 20 L76 80"], N: ["M30 80 L30 20 L70 80 L70 20"],
+  O: [O_UP], P: P_UP, Q: [O_UP, "M56 64 L76 86"], R: [...P_UP, "M50 52 L70 80"],
+  S: ["M68 30 C62 16 32 16 32 34 C32 52 68 46 68 64 C68 86 36 86 30 70"], T: ["M26 20 L74 20", "M50 20 L50 80"],
+  U: ["M30 20 L30 58 C30 88 70 88 70 58 L70 20"], V: ["M26 20 L50 80 L74 20"], W: ["M18 20 L32 80 L50 32 L68 80 L82 20"],
+  X: ["M30 20 L70 80", "M70 20 L30 80"], Y: ["M28 20 L50 50", "M72 20 L50 50 L50 80"], Z: ["M30 20 L70 20 L30 80 L70 80"],
+  "Ä": [...A_UP, D(40, 8), D(60, 8)], "Ö": [O_UP, D(40, 8), D(60, 8)], "Ü": ["M30 20 L30 58 C30 88 70 88 70 58 L70 20", D(40, 8), D(60, 8)]
+};
+const O_LO = "M50 45 C30 45 30 78 50 78 C70 78 70 45 50 45";
+const A_LO = ["M66 54 C60 42 34 42 34 62 C34 82 62 82 66 66", "M66 45 L66 78"];
+const U_LO = ["M34 45 L34 64 C34 82 66 82 66 64", "M66 45 L66 78"];
+const LOWER = {
+  a: A_LO, b: ["M34 18 L34 78", "M34 62 C34 40 66 40 66 62 C66 84 34 84 34 62"], c: ["M66 52 C60 40 34 42 34 62 C34 82 60 84 66 72"],
+  d: ["M66 62 C66 40 34 40 34 62 C34 84 66 84 66 62", "M66 18 L66 78"], e: ["M34 62 L66 62 C66 40 34 40 34 62 C34 84 60 84 66 74"],
+  f: ["M64 24 C58 14 46 16 46 30 L46 78", "M34 46 L60 46"], g: ["M66 62 C66 40 34 40 34 62 C34 84 66 84 66 62", "M66 45 L66 84 C66 98 40 98 36 88"],
+  h: ["M34 18 L34 78", "M34 58 C34 40 66 40 66 58 L66 78"], i: ["M50 45 L50 78", D(50, 30)], j: ["M56 45 L56 84 C56 98 40 98 36 90", D(56, 30)],
+  k: ["M34 18 L34 78", "M64 45 L34 64", "M44 58 L66 78"], l: ["M50 18 L50 78"],
+  m: ["M24 45 L24 78", "M24 58 C24 40 50 40 50 58 L50 78", "M50 58 C50 40 76 40 76 58 L76 78"], n: ["M34 45 L34 78", "M34 58 C34 40 66 40 66 58 L66 78"],
+  o: [O_LO], p: ["M34 45 L34 96", "M34 62 C34 40 66 40 66 62 C66 84 34 84 34 62"], q: ["M66 62 C66 40 34 40 34 62 C34 84 66 84 66 62", "M66 45 L66 96"],
+  r: ["M38 45 L38 78", "M38 60 C38 46 52 42 64 48"], s: ["M64 50 C58 42 36 42 36 52 C36 62 64 58 64 70 C64 82 40 82 34 74"],
+  t: ["M48 24 L48 70 C48 80 58 80 64 76", "M36 45 L62 45"], u: U_LO, v: ["M32 45 L50 78 L68 45"], w: ["M20 45 L33 78 L50 52 L67 78 L80 45"],
+  x: ["M34 45 L66 78", "M66 45 L34 78"], y: ["M32 45 L50 78", "M68 45 L44 96"], z: ["M34 45 L66 45 L34 78 L66 78"],
+  "ä": [...A_LO, D(42, 32), D(58, 32)], "ö": [O_LO, D(42, 32), D(58, 32)], "ü": [...U_LO, D(42, 32), D(58, 32)],
+  "ß": ["M34 80 L34 34 C34 16 62 16 62 34 C62 44 50 44 50 48 C66 50 70 60 68 68 C66 80 54 82 44 76"]
+};
+const DIGITS = {
+  0: ["M50 20 C28 20 28 80 50 80 C72 80 72 20 50 20"], 1: ["M36 36 L56 20 L56 80"],
+  2: ["M32 34 C34 16 66 16 66 36 C66 52 40 64 32 80 L70 80"], 3: ["M34 28 C44 14 66 18 64 34 C62 46 52 48 46 48 C60 48 68 56 68 66 C68 86 40 86 32 74"],
+  4: ["M46 20 L32 58 L70 58", "M60 36 L60 80"], 5: ["M66 20 L38 20 L36 46 C48 40 68 44 68 62 C68 86 40 86 32 74"],
+  6: ["M64 22 C42 22 32 46 32 62 C32 84 66 84 66 64 C66 46 38 46 33 60"], 7: ["M30 20 L70 20 L42 80", "M42 50 L62 50"],
+  8: ["M50 48 C30 46 32 20 50 20 C68 20 70 46 50 48 C28 50 28 80 50 80 C72 80 72 50 50 48"], 9: ["M66 36 C64 16 34 18 34 36 C34 54 64 54 66 36 L62 80"]
+};
+
+// [Buchstabe, arabischer Name, deutscher Name, Laut, verbindet nach links, Wort, Bild, Bedeutung]
+const LETTERS = [
+  ["ا","أَلِف","Alif","a",false,"أَسَد","🦁","Löwe"],
+  ["ب","بَاء","Bā","b",true,"بَاب","🚪","Tür"],
+  ["ت","تَاء","Tā","t",true,"تُفَّاح","🍎","Äpfel"],
+  ["ث","ثَاء","Thā","th",true,"ثَعْلَب","🦊","Fuchs"],
+  ["ج","جِيم","Dschīm","dsch",true,"جَمَل","🐪","Kamel"],
+  ["ح","حَاء","Ḥā","ḥ",true,"حِصَان","🐴","Pferd"],
+  ["خ","خَاء","Chā","ch",true,"خُبْز","🍞","Brot"],
+  ["د","دَال","Dāl","d",false,"دُبّ","🐻","Bär"],
+  ["ذ","ذَال","Dhāl","dh",false,"ذَهَب","🪙","Gold"],
+  ["ر","رَاء","Rā","r",false,"رَجُل","👨","Mann"],
+  ["ز","زَاي","Zāy","z",false,"زَيْتُون","🫒","Oliven"],
+  ["س","سِين","Sīn","s",true,"سَمَك","🐟","Fische"],
+  ["ش","شِين","Schīn","sch",true,"شَمْس","☀️","Sonne"],
+  ["ص","صَاد","Ṣād","ṣ",true,"صَقْر","🦅","Falke"],
+  ["ض","ضَاد","Ḍād","ḍ",true,"ضِفْدَع","🐸","Frosch"],
+  ["ط","طَاء","Ṭā","ṭ",true,"طَائِرَة","✈️","Flugzeug"],
+  ["ظ","ظَاء","Ẓā","ẓ",true,"ظَرْف","✉️","Briefumschlag"],
+  ["ع","عَيْن","ʿAin","ʿ",true,"عَيْن","👁️","Auge"],
+  ["غ","غَيْن","Ghain","gh",true,"غَزَال","🦌","Gazelle"],
+  ["ف","فَاء","Fā","f",true,"فِيل","🐘","Elefant"],
+  ["ق","قَاف","Qāf","q",true,"قَمَر","🌕","Mond"],
+  ["ك","كَاف","Kāf","k",true,"كِتَاب","📖","Buch"],
+  ["ل","لَام","Lām","l",true,"لَيْمُون","🍋","Zitrone"],
+  ["م","مِيم","Mīm","m",true,"مَوْز","🍌","Bananen"],
+  ["ن","نُون","Nūn","n",true,"نَجْمَة","⭐","Stern"],
+  ["ه","هَاء","Hā","h",true,"هِلَال","🌙","Mondsichel"],
+  ["و","وَاو","Wāw","w",false,"وَرْدَة","🌹","Rose"],
+  ["ي","يَاء","Yā","j",true,"يَد","✋","Hand"]
+];
+
+// Bild: Emoji, "#farbe" für Farben, "=Zahl" für Zahlen
+const THEMES = [
+  { id: "tiere", de: "Tiere 🐱", items: [
+    ["قِطَّة","Katze","🐱"],["كَلْب","Hund","🐶"],["أَسَد","Löwe","🦁"],["فِيل","Elefant","🐘"],["جَمَل","Kamel","🐪"],["حِصَان","Pferd","🐴"],
+    ["سَمَكَة","Fisch","🐟"],["طَائِر","Vogel","🐦"],["أَرْنَب","Hase","🐰"],["بَقَرَة","Kuh","🐄"],["خَرُوف","Schaf","🐑"],["دَجَاجَة","Huhn","🐔"]]},
+  { id: "farben", de: "Farben 🎨", items: [
+    ["أَحْمَر","rot","#e5484d"],["أَزْرَق","blau","#1f7fe0"],["أَخْضَر","grün","#2fbf68"],["أَصْفَر","gelb","#ffd23d"],
+    ["أَبْيَض","weiß","#ffffff"],["أَسْوَد","schwarz","#1d1d1d"],["بُرْتُقَالِيّ","orange","#ff8a2b"],["بَنَفْسَجِيّ","lila","#8b5cf6"]]},
+  { id: "zahlen", de: "Zahlen 🔢", items: [
+    ["وَاحِد","eins","=1"],["اِثْنَان","zwei","=2"],["ثَلَاثَة","drei","=3"],["أَرْبَعَة","vier","=4"],["خَمْسَة","fünf","=5"],
+    ["سِتَّة","sechs","=6"],["سَبْعَة","sieben","=7"],["ثَمَانِيَة","acht","=8"],["تِسْعَة","neun","=9"],["عَشَرَة","zehn","=10"]]},
+  { id: "familie", de: "Familie 👨‍👩‍👦", items: [
+    ["أَب","Vater","👨"],["أُمّ","Mutter","👩"],["أَخ","Bruder","👦"],["أُخْت","Schwester","👧"],["جَدّ","Opa","👴"],["جَدَّة","Oma","👵"],["طِفْل","Kind","🧒"],["بَيْت","Haus","🏠"]]},
+  { id: "essen", de: "Essen 🍎", items: [
+    ["خُبْز","Brot","🍞"],["مَاء","Wasser","💧"],["حَلِيب","Milch","🥛"],["تُفَّاحَة","Apfel","🍎"],["مَوْزَة","Banane","🍌"],["بُرْتُقَالَة","Orange","🍊"],
+    ["عِنَب","Trauben","🍇"],["بَيْضَة","Ei","🥚"],["جُبْن","Käse","🧀"],["عَسَل","Honig","🍯"]]},
+  { id: "koerper", de: "Körper ✋", items: [
+    ["رَأْس","Kopf","🙂"],["عَيْن","Auge","👁️"],["أُذُن","Ohr","👂"],["أَنْف","Nase","👃"],["فَم","Mund","👄"],["يَد","Hand","✋"],["رِجْل","Bein","🦵"],["سِنّ","Zahn","🦷"]]},
+  { id: "natur", de: "Natur 🌳", items: [
+    ["شَمْس","Sonne","☀️"],["قَمَر","Mond","🌙"],["نَجْمَة","Stern","⭐"],["شَجَرَة","Baum","🌳"],["وَرْدَة","Rose","🌹"],["بَحْر","Meer","🌊"],["جَبَل","Berg","⛰️"],["مَطَر","Regen","🌧️"]]},
+  { id: "saetze", de: "Kleine Sätze 💬", items: [
+    ["ٱلسَّلَامُ عَلَيْكُمْ","Friede sei mit euch","👋"],["وَعَلَيْكُمُ ٱلسَّلَامُ","Und mit euch sei Friede","🤝"],["بِسْمِ ٱللَّهِ","Im Namen Allahs","🤲"],
+    ["ٱلْحَمْدُ لِلَّهِ","Gelobt sei Allah","😊"],["شُكْرًا","Danke","🙏"],["صَبَاحُ ٱلْخَيْرِ","Guten Morgen","🌅"],["نَعَمْ","Ja","👍"],["لَا","Nein","👎"]]}
+];
+
+const ZWJ = "‍";
+const arNum = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+const $ = id => document.getElementById(id);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// ---------- Fortschritt (nur auf diesem Gerät gespeichert) ----------
+const KEY = "hudhud-v1";
+let state = { stars: 0, seen: [], traced: [], learned: [], stickers: [], usage: {}, limit: 20, seenDe: [], seenNum: [], name: "", arName: "", day: null, learnDays: 0, lstats: {}, kstep: {}, breakEvery: 10 };
+try {
+  const s = JSON.parse(localStorage.getItem(KEY));
+  if (s) state = { ...state, ...s };
+  else { const old = JSON.parse(localStorage.getItem("hudhud-legacy")); if (old) state = { ...state, stars: old.stars || 0, seen: old.seen || [], learned: old.learned || [] }; }
+} catch (e) {}
+state.traced = state.traced.map(k => typeof k === "number" ? (k === 28 ? "ar:name" : "ar:" + k) : k);
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function addStars(n) {
+  state.stars = Math.max(0, state.stars + n); save();
+  $("starCount").textContent = state.stars;
+  bump($("stars"), "pop");
+  if (n > 0) hudhud(withName(PRAISE[Math.floor(Math.random() * PRAISE.length)]));
+  renderGames();
+}
+const PRAISE = ["Super gemacht! ⭐", "Mā schāʾ Allāh! 🌟", "Toll gemacht! 🎉", "Du bist ein Star! ✨", "Bārak Allāhu fīk! 💛", "Weiter so! 🚀"];
+const withName = s => state.name ? s.replace("!", ", " + state.name + "!") : s;
+let bubbleTimer = 0;
+function hudhud(msg) {
+  const b = $("bubble"); b.textContent = msg; bump(b, "pop");
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => { b.textContent = "Lernen bringt Sterne, mit Sternen darfst du spielen!"; }, 6000);
+}
+function bump(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+$("starCount").textContent = state.stars;
+
+// ---------- Töne ----------
+let actx = null;
+function tone(freqs, type = "sine") {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * 0.11;
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.3);
+    });
+  } catch (e) {}
+}
+const yay = () => tone([660, 880, 1320]);
+const oops = () => tone([300, 220], "triangle");
+
+let arVoice = null;
+function pickVoice() {
+  if (!("speechSynthesis" in window)) { $("voiceNote").hidden = false; return; }
+  const vs = speechSynthesis.getVoices();
+  arVoice = vs.find(v => v.lang && v.lang.toLowerCase().startsWith("ar")) || null;
+  $("voiceNote").hidden = !!arVoice || vs.length === 0;
+}
+try { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; } catch (e) {}
+let deVoice = null;
+function pickDeVoice() { try { deVoice = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith("de")) || null; } catch (e) {} }
+try { pickDeVoice(); speechSynthesis.addEventListener("voiceschanged", pickDeVoice); } catch (e) {}
+function speakDe(text) {
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "de-DE"; if (deVoice) u.voice = deVoice; u.rate = 0.85;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function speak(text) {
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ar-SA"; if (arVoice) u.voice = arVoice; u.rate = 0.75;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// ---------- Konfetti ----------
+const cv = $("confetti"), cx = cv.getContext("2d");
+let bits = [], raf = 0;
+function confetti(n = 90) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio;
+  const cols = ["#ffc83d", "#ff5c93", "#2fbf68", "#ff8a2b", "#8b5cf6", "#129bdb"];
+  for (let i = 0; i < n; i++) bits.push({ x: cv.width / 2, y: cv.height * 0.45, vx: (Math.random() - .5) * 26 * devicePixelRatio, vy: (-Math.random() * 18 - 6) * devicePixelRatio,
+    s: (6 + Math.random() * 8) * devicePixelRatio, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[i % cols.length], life: 90 + Math.random() * 40 });
+  if (!raf) raf = requestAnimationFrame(tick);
+}
+function tick() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  bits = bits.filter(b => b.life-- > 0 && b.y < cv.height + 40);
+  bits.forEach(b => { b.vy += 0.6 * devicePixelRatio; b.vx *= .985; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+    cx.save(); cx.translate(b.x, b.y); cx.rotate(b.r); cx.fillStyle = b.c; cx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); cx.restore(); });
+  raf = bits.length ? requestAnimationFrame(tick) : (cx.clearRect(0, 0, cv.width, cv.height), 0);
+}
+
+// ---------- Welten ----------
+const TABS = ["buchstaben", "vokale", "spuren", "woerter", "spiele", "koran", "abc", "zahlen", "spielplatz"];
+function showTab(t) {
+  if (!TABS.includes(t)) t = "buchstaben";
+  TABS.forEach(x => { $("p-" + x).hidden = x !== t; $("tab-" + x).setAttribute("aria-selected", x === t); });
+  try { history.replaceState(null, "", "#" + t); } catch (e) {}
+  if (t === "spuren") requestAnimationFrame(() => { setupPad(); });
+  else stopDemo();
+  if (t === "spiele" && !quiz) startQuiz("letters");
+  if (t !== "spielplatz") stopGame();
+  if (t !== "koran") stopAudio();
+}
+document.querySelectorAll(".worlds button, .playground-btn").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+// ---------- Buchstaben ----------
+function forms(L) {
+  const c = L[0];
+  return L[4]
+    ? [[c, "allein"], [c + ZWJ, "Anfang"], [ZWJ + c + ZWJ, "Mitte"], [ZWJ + c, "Ende"]]
+    : [[c, "allein"], [c, "Anfang"], [ZWJ + c, "Mitte"], [ZWJ + c, "Ende"]];
+}
+let current = 0;
+function renderGrid() {
+  $("letterGrid").innerHTML = LETTERS.map((L, i) =>
+    `<button class="tile${state.seen.includes(i) ? " seen" : ""}" aria-pressed="${i === current}" data-i="${i}" aria-label="${L[2]}"><b lang="ar">${L[0]}</b><span>${L[2]}</span></button>`).join("");
+  $("letterGrid").querySelectorAll(".tile").forEach(b => b.onclick = () => selectLetter(+b.dataset.i, true));
+}
+function selectLetter(i, play) {
+  current = i;
+  const L = LETTERS[i];
+  if (play) { speak(L[1]); if (!state.seen.includes(i)) { state.seen.push(i); dayAdd("newAr"); addStars(1); if (state.seen.length === 28) { confetti(160); yay(); } } }
+  renderGrid();
+  $("detail").innerHTML = `
+    <div class="big">
+      <h3>${L[2]}<span lang="ar">${L[1]}</span><small>Laut: „${L[3]}“</small></h3>
+      <div class="glyph" lang="ar">${L[0]}</div>
+    </div>
+    <div class="row"><button class="say" id="sayName">${SPEAK} Anhören</button><button class="soft" id="goTrace">✏️ Schreiben</button></div>
+    <div class="forms" lang="ar">${forms(L).map(f => `<div><b>${f[0]}</b><small>${f[1]}</small></div>`).join("")}</div>
+    ${L[4] ? "" : `<p class="note">Dieser Buchstabe verbindet sich nie mit dem nächsten Buchstaben.</p>`}
+    <div class="word">
+      <span class="pic" aria-hidden="true">${L[6]}</span>
+      <div><div lang="ar">${L[5]}</div><p>${L[7]}</p></div>
+      <button class="round" id="sayWord" aria-label="Wort anhören">${SPEAK}</button>
+    </div>
+    <p class="note">${state.seen.length} von 28 Buchstaben entdeckt</p>`;
+  $("sayName").onclick = () => speak(L[1]);
+  $("sayWord").onclick = () => speak(L[5]);
+  $("goTrace").onclick = () => goTrace("ar", i);
+}
+
+// ---------- Vokale ----------
+let hIndex = 1;
+function renderHarakat() {
+  $("harakaChips").innerHTML = LETTERS.map((L, i) => `<button aria-pressed="${i === hIndex}" data-i="${i}" lang="ar" aria-label="${L[2]}">${L[0]}</button>`).join("");
+  $("harakaChips").querySelectorAll("button").forEach(b => b.onclick = () => { hIndex = +b.dataset.i; renderHarakat(); });
+  const L = LETTERS[hIndex], alif = hIndex === 0, t = alif ? "" : L[3];
+  const cards = [
+    [(alif ? "أ" : L[0]) + "َ", t + "a", "Fatḥa", "ein Strich oben"],
+    [(alif ? "إ" : L[0]) + "ِ", t + "i", "Kasra", "ein Strich unten"],
+    [(alif ? "أ" : L[0]) + "ُ", t + "u", "Ḍamma", "ein kleines Wāw oben"],
+    [(alif ? "أ" : L[0]) + "ْ", alif ? "ʾ" : t, "Sukūn", "ein Kreis: kein Vokal"]
+  ];
+  $("harakat").innerHTML = cards.map(c => `<button class="hcard" data-say="${c[0]}"><b lang="ar">${c[0]}</b><span class="sound">${c[1]}</span><small>${c[2]} · ${c[3]}</small></button>`).join("");
+  $("harakat").querySelectorAll(".hcard").forEach(b => b.onclick = () => { speak(b.dataset.say); bump(b, "pop"); });
+}
+
+// ---------- Schreiben ----------
+const NUM_WORDS = ["null","eins","zwei","drei","vier","fünf","sechs","sieben","acht","neun","zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn","sechzehn","siebzehn","achtzehn","neunzehn","zwanzig"];
+const TRACE_SETS = {
+  ar: { label: "عربي", lines: [62], items: LETTERS.map((L, i) => ({ key: "ar:" + i, t: L[0], label: L[2], say: () => speak(L[1]), strokes: AR_STROKES[i] }))
+ },
+  up: { label: "ABC", lines: [20, 50, 80], items: Object.keys(UPPER).map(c => ({ key: "up:" + c, t: c, label: c, say: () => speakDe(c), strokes: UPPER[c] })) },
+  lo: { label: "abc", lines: [18, 45, 78, 96], items: Object.keys(LOWER).map(c => ({ key: "lo:" + c, t: c, label: c, say: () => speakDe(c), strokes: LOWER[c] })) },
+  num: { label: "123", lines: [20, 80], items: Object.keys(DIGITS).map(c => ({ key: "num:" + c, t: c, label: c, say: () => speakDe(NUM_WORDS[+c]), strokes: DIGITS[c] })) }
+};
+const AR_BASE = TRACE_SETS.ar.items;
+function nameTraceItem() {
+  TRACE_SETS.ar.items = state.arName ? AR_BASE.concat([{ key: "ar:name", t: state.arName, label: state.name || "Name", say: () => speak(state.arName), font: true }]) : AR_BASE;
+}
+nameTraceItem();
+const traceTotal = () => Object.values(TRACE_SETS).reduce((n, s) => n + s.items.length, 0);
+let traceSet = "ar", traceIndex = 0, pad = null, demo = null;
+const curItem = () => TRACE_SETS[traceSet].items[traceIndex];
+function goTrace(set, i) { traceSet = set; traceIndex = i; renderTraceChips(); showTab("spuren"); drawGuide(); }
+function renderTraceChips() {
+  const S = TRACE_SETS[traceSet];
+  $("traceSets").innerHTML = Object.entries(TRACE_SETS).map(([k, s]) => `<button aria-pressed="${k === traceSet}" data-s="${k}" ${k === "ar" ? 'lang="ar"' : ""}>${s.label}</button>`).join("");
+  $("traceSets").querySelectorAll("button").forEach(b => b.onclick = () => { traceSet = b.dataset.s; traceIndex = 0; renderTraceChips(); drawGuide(); });
+  $("traceChips").className = "chips" + (traceSet === "ar" ? "" : " ltr");
+  $("traceChips").innerHTML = S.items.map((x, i) =>
+    `<button aria-pressed="${i === traceIndex}" data-i="${i}" ${traceSet === "ar" ? 'lang="ar"' : ""} aria-label="${x.label}">${x.t}${state.traced.includes(x.key) ? "<sup>★</sup>" : ""}</button>`).join("");
+  $("traceChips").querySelectorAll("button").forEach(b => b.onclick = () => { traceIndex = +b.dataset.i; renderTraceChips(); drawGuide(); });
+  $("traceSay").innerHTML = `${SPEAK} ${curItem().label}`;
+  $("traceShow").hidden = !!curItem().font;
+  const done = S.items.filter(x => state.traced.includes(x.key)).length;
+  $("traceCount").textContent = `${done} von ${S.items.length} geschafft` + (traceSet === "ar" && state.arName ? ". Der letzte ist dein Name!" : ".");
+}
+function setupPad() {
+  const box = $("pad"), w = box.clientWidth;
+  if (!w) return;
+  const px = Math.round(w * devicePixelRatio);
+  if (pad && pad.px === px) return;
+  const guide = $("guide"), ink = $("ink");
+  guide.width = guide.height = ink.width = ink.height = px;
+  pad = { px, g: guide.getContext("2d"), k: ink.getContext("2d"), mask: null, zone: null, done: false, drawing: false, last: null };
+  drawGuide();
+}
+const isDot = d => /l0\.1 0$/.test(d);
+const startOf = d => d.match(/M\s*([\d.]+)[ ,]([\d.]+)/).slice(1).map(Number);
+const W = 11;
+function strokeLayer(ctx, item, width, dotWidth) {
+  ctx.save(); ctx.scale(pad.px / 100, pad.px / 100);
+  ctx.lineCap = ctx.lineJoin = "round";
+  item.strokes.forEach(d => { ctx.lineWidth = isDot(d) ? dotWidth : width; ctx.stroke(new Path2D(d)); });
+  ctx.restore();
+}
+function maskOf(paint) {
+  const o = document.createElement("canvas"); o.width = o.height = pad.px;
+  const ctx = o.getContext("2d"); ctx.strokeStyle = ctx.fillStyle = "#000"; paint(ctx);
+  return ctx.getImageData(0, 0, pad.px, pad.px).data;
+}
+async function drawGuide() {
+  if (!pad) return;
+  stopDemo();
+  const item = curItem(), { px, g, k } = pad, S = TRACE_SETS[traceSet];
+  pad.done = false; $("praise").textContent = ""; $("meter").style.width = "0%";
+  k.clearRect(0, 0, px, px);
+  g.clearRect(0, 0, px, px);
+  // Linien wie im Schulheft
+  g.strokeStyle = "#cfeedb"; g.lineWidth = px / 180;
+  (item.font ? [62] : S.lines).forEach((y, i, all) => {
+    g.setLineDash(all.length > 2 && (i === 1) ? [px / 50, px / 60] : []);
+    g.beginPath(); g.moveTo(0, y * px / 100); g.lineTo(px, y * px / 100); g.stroke();
+  });
+  g.setLineDash([]);
+  if (item.font) {
+    const font = '800 100px "Baloo Bhaijaan 2"';
+    try { await document.fonts.load(font, item.t); } catch (e) {}
+    if (curItem() !== item) return;
+    g.font = font; g.direction = "rtl"; g.textAlign = "center"; g.textBaseline = "alphabetic";
+    let m = g.measureText(item.t);
+    const size = 100 * Math.min(px * 0.72 / (m.actualBoundingBoxLeft + m.actualBoundingBoxRight), px * 0.72 / (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent));
+    const f2 = `800 ${size}px "Baloo Bhaijaan 2"`;
+    g.font = f2; m = g.measureText(item.t);
+    const x = px / 2 + (m.actualBoundingBoxLeft - m.actualBoundingBoxRight) / 2, y = px / 2 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+    g.fillStyle = "#e3f7ea"; g.fillText(item.t, x, y);
+    g.setLineDash([px / 60, px / 70]); g.lineWidth = px / 200; g.strokeStyle = "#2fbf68"; g.strokeText(item.t, x, y); g.setLineDash([]);
+    const setup = ctx => { ctx.font = f2; ctx.direction = "rtl"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; };
+    pad.brush = Math.max(14, px * 0.055);
+    pad.mask = maskOf(ctx => { setup(ctx); ctx.fillText(item.t, x, y); });
+    pad.zone = maskOf(ctx => { setup(ctx); ctx.lineJoin = "round"; ctx.lineWidth = pad.brush * 2.2; ctx.strokeText(item.t, x, y); ctx.fillText(item.t, x, y); });
+    return;
+  }
+  // Buchstabe aus Schreibwegen: breite Spur, gestrichelte Mittellinie, nummerierte Startpunkte
+  g.strokeStyle = "#e3f7ea"; strokeLayer(g, item, W, W * 1.25);
+  g.save(); g.scale(px / 100, px / 100); g.setLineDash([2, 2.4]); g.lineWidth = 0.6; g.strokeStyle = "#2fbf68"; g.lineCap = "round";
+  item.strokes.forEach(d => { if (!isDot(d)) g.stroke(new Path2D(d)); }); g.restore();
+  const placed = [];
+  item.strokes.forEach((d, i) => {
+    let [x, y] = startOf(d);
+    while (placed.some(([a, b]) => Math.hypot(a - x, b - y) < 6)) x += 7;
+    placed.push([x, y]); g.save(); g.scale(px / 100, px / 100);
+    g.fillStyle = "#2fbf68"; g.beginPath(); g.arc(x, y, 3.6, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#fff"; g.font = '800 4.6px "Baloo Bhaijaan 2", sans-serif'; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(i + 1, x, y + 0.3);
+    g.restore();
+  });
+  pad.brush = W * 0.95 * px / 100;
+  pad.mask = maskOf(ctx => strokeLayer(ctx, item, W, W * 1.25));
+  pad.zone = maskOf(ctx => strokeLayer(ctx, item, W * 2.6, W * 2.8));
+  playDemo();
+}
+// Animation: Hudhuds Stift fährt jeden Strich in der richtigen Reihenfolge und Richtung nach
+function stopDemo() { if (demo) { cancelAnimationFrame(demo.raf); demo = null; } const s = $("demo"); s.innerHTML = ""; s.style.opacity = 1; }
+function playDemo() {
+  stopDemo();
+  const item = curItem();
+  if (item.font || !$("p-spuren") || $("p-spuren").hidden) return;
+  const svg = $("demo"), NS = "http://www.w3.org/2000/svg";
+  const paths = item.strokes.map(d => {
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", d); p.setAttribute("fill", "none"); p.setAttribute("stroke", "#ff5c93");
+    p.setAttribute("stroke-width", isDot(d) ? 9 : 6); p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(p);
+    const len = Math.max(p.getTotalLength(), 0.1);
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    return { p, len, dot: isDot(d), ms: isDot(d) ? 350 : Math.max(500, len * 22) };
+  });
+  const pen = document.createElementNS(NS, "circle");
+  pen.setAttribute("r", 4.2); pen.setAttribute("fill", "#ffc83d"); pen.setAttribute("stroke", "#c58f00"); pen.setAttribute("stroke-width", 1.2);
+  svg.appendChild(pen);
+  let i = 0, t0 = performance.now() + 300;
+  demo = { raf: 0 };
+  hudhud("Schau gut zu, so schreibt man das! 👀");
+  const step = now => {
+    if (!demo) return;
+    const s = paths[i], f = Math.max(0, Math.min(1, (now - t0) / s.ms));
+    const e = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+    s.p.style.strokeDashoffset = s.len * (1 - e);
+    const pt = s.p.getPointAtLength(s.len * e); pen.setAttribute("cx", pt.x); pen.setAttribute("cy", pt.y);
+    if (f >= 1) { i++; t0 = now + 250; }
+    if (i < paths.length) demo.raf = requestAnimationFrame(step);
+    else { demo.raf = requestAnimationFrame(() => {}); setTimeout(() => { if (!demo) return; svg.style.opacity = 0; setTimeout(() => { if (demo) stopDemo(); hudhud("Jetzt du! Fang beim grünen Punkt 1 an. ✏️"); }, 500); }, 900); }
+  };
+  demo.raf = requestAnimationFrame(step);
+}
+function padPoint(e) { const r = $("ink").getBoundingClientRect(); return [(e.clientX - r.left) / r.width * pad.px, (e.clientY - r.top) / r.height * pad.px]; }
+function inkLine(a, b) {
+  const k = pad.k; k.strokeStyle = "#ff5c93"; k.lineWidth = pad.brush; k.lineCap = k.lineJoin = "round";
+  k.beginPath(); k.moveTo(a[0], a[1]); k.lineTo(b[0], b[1]); k.stroke();
+}
+function checkTrace() {
+  if (!pad || pad.done || !pad.mask) return;
+  const user = pad.k.getImageData(0, 0, pad.px, pad.px).data, step = 4 * 3;
+  let mask = 0, hit = 0, ink = 0, out = 0;
+  for (let i = 3; i < user.length; i += step) {
+    const m = pad.mask[i] > 100, u = user[i] > 100;
+    if (m) { mask++; if (u) hit++; }
+    if (u) { ink++; if (pad.zone[i] < 50) out++; }
+  }
+  const cover = mask ? hit / mask : 0, outside = ink ? out / ink : 0, need = curItem().font ? 0.72 : 0.7;
+  $("meter").style.width = Math.min(100, Math.round(cover / need * 100)) + "%";
+  if (cover >= need && outside < 0.3) {
+    pad.done = true;
+    $("praise").style.color = "var(--good)";
+    $("praise").textContent = withName(["Super gemacht! 🎉", "Toll! ⭐", "Mā schāʾ Allāh! 🌟", "Wunderbar! 🎈"][Math.floor(Math.random() * 4)]);
+    dayAdd("traces");
+    yay(); confetti(); curItem().say();
+    if (!state.traced.includes(curItem().key)) { state.traced.push(curItem().key); addStars(2); }
+    renderTraceChips();
+  } else if (outside >= 0.3 && ink > 200) {
+    $("praise").style.color = "var(--tang)";
+    $("praise").textContent = "Bleib auf der Spur 🙂";
+  }
+}
+const inkCv = $("ink");
+inkCv.addEventListener("pointerdown", e => { if (!pad) return; e.preventDefault(); stopDemo(); inkCv.setPointerCapture(e.pointerId); pad.drawing = true; pad.last = padPoint(e); inkLine(pad.last, pad.last); });
+inkCv.addEventListener("pointermove", e => { if (!pad || !pad.drawing) return; const p = padPoint(e); inkLine(pad.last, p); pad.last = p; });
+["pointerup", "pointercancel"].forEach(ev => inkCv.addEventListener(ev, () => { if (pad && pad.drawing) { pad.drawing = false; checkTrace(); } }));
+$("traceClear").onclick = () => drawGuide();
+$("traceNext").onclick = () => { traceIndex = (traceIndex + 1) % TRACE_SETS[traceSet].items.length; renderTraceChips(); drawGuide(); };
+$("traceSay").onclick = () => curItem().say();
+$("traceShow").onclick = () => { pad && pad.k.clearRect(0, 0, pad.px, pad.px); pad && (pad.done = false); $("meter").style.width = "0%"; $("praise").textContent = ""; playDemo(); };
+addEventListener("resize", () => { if (!$("p-spuren").hidden) { pad = null; setupPad(); } });
+
+// ---------- Deutsch: ABC ----------
+const DE_WORDS = { A: ["Affe","🐒"], B: ["Ball","⚽"], C: ["Clown","🤡"], D: ["Dino","🦕"], E: ["Ente","🦆"], F: ["Fisch","🐟"], G: ["Giraffe","🦒"],
+  H: ["Hund","🐶"], I: ["Igel","🦔"], J: ["Jacke","🧥"], K: ["Katze","🐱"], L: ["Löwe","🦁"], M: ["Maus","🐭"], N: ["Nase","👃"], O: ["Oma","👵"],
+  P: ["Pinguin","🐧"], Q: ["Qualle","🪼"], R: ["Rakete","🚀"], S: ["Sonne","☀️"], T: ["Tomate","🍅"], U: ["Uhr","⏰"], V: ["Vogel","🐦"], W: ["Wal","🐳"],
+  X: ["Xylofon","🎶"], Y: ["Yoga","🧘"], Z: ["Zebra","🦓"], "Ä": ["Äpfel","🍎"], "Ö": ["Öl","🫒"], "Ü": ["Überraschung","🎁"], "ß": ["Fuß","🦶"] };
+const ABC = Object.keys(DE_WORDS);
+let abcIndex = 0;
+function abcSay(c) { const w = DE_WORDS[c]; speakDe(c === "ß" ? "scharfes S, wie in Fuß" : `${c}. ${c} wie ${w[0]}`); }
+function renderAbc(play) {
+  const c = ABC[abcIndex], w = DE_WORDS[c], low = c === "ß" ? "ß" : c.toLowerCase(), up = c === "ß" ? "" : c;
+  if (play) { abcSay(c); if (!state.seenDe.includes(c)) { state.seenDe.push(c); dayAdd("newDe"); addStars(1); if (state.seenDe.length === ABC.length) { confetti(160); yay(); } } }
+  $("abcGrid").innerHTML = ABC.map((x, i) => `<button class="tile${state.seenDe.includes(x) ? " seen" : ""}" aria-pressed="${i === abcIndex}" data-i="${i}"><b>${x === "ß" ? "ß" : x + x.toLowerCase()}</b><span>${DE_WORDS[x][1]}</span></button>`).join("");
+  $("abcGrid").querySelectorAll(".tile").forEach(b => b.onclick = () => { abcIndex = +b.dataset.i; renderAbc(true); });
+  const upIdx = Object.keys(UPPER).indexOf(c), loIdx = Object.keys(LOWER).indexOf(low);
+  $("abcDetail").innerHTML = `
+    <div class="de-big"><h3 style="margin:0;font-size:1.6rem">${c === "ß" ? "Scharfes S" : "Buchstabe " + c}</h3><div class="glyph">${up}<small>${low}</small></div></div>
+    <div class="word"><span class="pic" aria-hidden="true">${w[1]}</span><div><div style="font-size:1.7rem;font-weight:800;line-height:1.2">${c === "ß" ? "Fu<u>ß</u>" : `<u>${w[0][0]}</u>${w[0].slice(1)}`}</div><p>${c === "ß" ? "ß steht nie am Anfang" : c + " wie " + w[0]}</p></div>
+      <button class="round" id="abcHear" aria-label="Anhören">${SPEAK}</button></div>
+    <div class="row">
+      ${upIdx >= 0 ? `<button class="soft" id="abcUp">✏️ ${up} schreiben</button>` : ""}
+      ${loIdx >= 0 ? `<button class="soft" id="abcLo">✏️ ${low} schreiben</button>` : ""}
+    </div>
+    <p class="note">${state.seenDe.length} von ${ABC.length} Buchstaben entdeckt</p>`;
+  $("abcHear").onclick = () => abcSay(c);
+  if ($("abcUp")) $("abcUp").onclick = () => goTrace("up", upIdx);
+  if ($("abcLo")) $("abcLo").onclick = () => goTrace("lo", loIdx);
+}
+
+// ---------- Deutsch: Zahlen ----------
+const COUNT_PICS = ["🍎","⭐","🐟","🎈","🐞","🚗","🌸","🍌","🐥","⚽"];
+let countQ = null;
+function tenframe(n) { return n > 0 && n <= 10 ? `<span class="tenframe" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>` : ""; }
+function renderNumbers() {
+  $("numGrid").innerHTML = NUM_WORDS.map((w, n) => `<button class="ncard${state.seenNum.includes(n) ? " seen" : ""}" data-n="${n}"><b>${n}</b><span>${w}</span>${tenframe(n)}</button>`).join("");
+  $("numGrid").querySelectorAll(".ncard").forEach(b => b.onclick = () => {
+    const n = +b.dataset.n; speakDe(NUM_WORDS[n]); bump(b, "pop");
+    if (!state.seenNum.includes(n)) { state.seenNum.push(n); addStars(1); renderNumbers(); }
+  });
+}
+function newCount() {
+  const n = 1 + Math.floor(Math.random() * 10), pic = COUNT_PICS[Math.floor(Math.random() * COUNT_PICS.length)];
+  const opts = shuffle([n, ...shuffle([...Array(11).keys()].filter(x => x > 0 && x !== n && Math.abs(x - n) <= 3)).slice(0, 3)]);
+  countQ = { n, pic, opts, done: false };
+  $("countBox").innerHTML = `<div class="qtop"><span>Zählspiel: Wie viele siehst du?</span><button class="soft" id="cDigits">✏️ Zahlen schreiben</button></div>
+    <div class="count-pics" aria-label="${n} Bilder">${Array(n).fill(pic).join("")}</div>
+    <div class="options" id="cOpts">${opts.map(x => `<button data-n="${x}">${x}<span style="display:block;font-size:1rem;color:var(--muted);font-weight:600">${NUM_WORDS[x]}</span></button>`).join("")}</div>
+    <p class="feedback" id="cFb" aria-live="polite"></p>`;
+  $("cDigits").onclick = () => goTrace("num", 0);
+  $("cOpts").querySelectorAll("button").forEach(b => b.onclick = () => {
+    if (countQ.done) return;
+    const ok = +b.dataset.n === n;
+    if (ok) {
+      countQ.done = true; b.classList.add("ok"); $("cFb").className = "feedback ok"; $("cFb").textContent = `Richtig, ${NUM_WORDS[n]}! +1 Stern ⭐`;
+      speakDe(NUM_WORDS[n]); yay(); confetti(40); addStars(1); dayAdd("count"); setTimeout(newCount, 1600);
+    } else { b.classList.add("ko"); b.disabled = true; $("cFb").className = "feedback ko"; $("cFb").textContent = "Zähl noch einmal genau 🙂"; oops(); bump(b, "wiggle"); }
+  });
+}
+
+// ---------- Wörter ----------
+let themeIndex = 0;
+function picHTML(p, big) {
+  if (p[0] === "#") return `<span class="swatch" style="background:${p}"></span>`;
+  if (p[0] === "=") return `<span class="digit">${arNum(p.slice(1))} <small>${p.slice(1)}</small></span>`;
+  return big ? p : `<span aria-hidden="true">${p}</span>`;
+}
+function renderVocab() {
+  $("themeChips").innerHTML = THEMES.map((T, i) => `<button aria-pressed="${i === themeIndex}" data-i="${i}">${T.de}</button>`).join("");
+  $("themeChips").querySelectorAll("button").forEach(b => b.onclick = () => { themeIndex = +b.dataset.i; renderVocab(); });
+  const T = THEMES[themeIndex];
+  $("vocab").innerHTML = T.items.map((w, i) =>
+    `<button class="vcard${T.id === "saetze" ? " wide" : ""}" data-i="${i}"><span class="pic">${picHTML(w[2])}</span><span lang="ar">${w[0]}</span><span class="de">${w[1]}</span></button>`).join("");
+  $("vocab").querySelectorAll(".vcard").forEach(b => b.onclick = () => { speak(T.items[+b.dataset.i][0]); bump(b, "wiggle"); });
+}
+
+// ---------- Spiele ----------
+let quiz = null;
+function startQuiz(kind) {
+  $("gLetters").setAttribute("aria-pressed", kind === "letters");
+  $("gWords").setAttribute("aria-pressed", kind === "words");
+  let q;
+  if (kind === "letters") {
+    // Nur bekannte Buchstaben abfragen; schwierige kommen öfter dran (verteilte Wiederholung)
+    const pool = state.seen.length >= 6 ? state.seen.slice() : [0, 1, 2, 3, 4, 5];
+    const weight = i => { const [r, w] = state.lstats[i] || [0, 0]; return Math.max(0.4, 1 + w * 1.5 - r * 0.3); };
+    const picks = [];
+    for (let n = 0; n < 10; n++) {
+      const cand = pool.filter(i => i !== picks[picks.length - 1]);
+      let x = Math.random() * cand.reduce((s, i) => s + weight(i), 0);
+      picks.push(cand.find(i => (x -= weight(i)) <= 0) ?? cand[0]);
+    }
+    q = picks.map((ans, k) => ({ ans, type: k % 2 ? "find" : "name",
+      opts: shuffle([ans, ...shuffle([...LETTERS.keys()].filter(x => x !== ans)).slice(0, 3)]) }));
+  } else {
+    const pool = THEMES.filter(T => T.id !== "saetze").flatMap(T => T.items.map((w, i) => ({ T, i })));
+    q = shuffle(pool).slice(0, 10).map(a => ({ type: "word", T: a.T, ans: a.i,
+      opts: shuffle([a.i, ...shuffle([...a.T.items.keys()].filter(x => x !== a.i)).slice(0, 3)]) }));
+  }
+  quiz = { kind, q, at: 0, res: [] };
+  renderQuiz();
+}
+$("gLetters").onclick = () => startQuiz("letters");
+$("gWords").onclick = () => startQuiz("words");
+function renderQuiz() {
+  const box = $("quiz");
+  const dots = quiz.q.map((_, k) => `<i class="${k < quiz.res.length ? (quiz.res[k] ? "ok" : "ko") : k === quiz.at ? "now" : ""}"></i>`).join("");
+  if (quiz.at >= quiz.q.length) {
+    const good = quiz.res.filter(Boolean).length;
+    const msg = good === 10 ? withName("Alles richtig! Bravo!") : good >= 7 ? "Sehr gut! Weiter so!" : "Gut gemacht! Noch einmal?";
+    box.innerHTML = `<div class="qtop"><span>Fertig!</span><div class="dots">${dots}</div></div>
+      <div class="result"><div class="score">${good} / 10</div><p style="margin:0;font-weight:800;font-size:1.3rem">${msg}</p>
+      <p lang="ar" style="margin:0;font-size:1.6rem;font-weight:800;color:var(--grape)">مَا شَاءَ ٱللَّه</p></div>
+      <button class="big-btn" id="again">Nochmal spielen</button>`;
+    $("again").onclick = () => startQuiz(quiz.kind);
+    if (good >= 7) { confetti(150); yay(); }
+    return;
+  }
+  const Q = quiz.q[quiz.at];
+  let prompt, opts, cls = "";
+  if (Q.type === "word") {
+    const W = Q.T.items[Q.ans];
+    prompt = `<h3>Hör zu! Welches Bild passt?</h3><div class="qword" lang="ar">${W[0]}</div><button class="say" id="hear">${SPEAK} Nochmal hören</button>`;
+    opts = Q.opts.map(i => { const w = Q.T.items[i]; return `<button data-i="${i}" aria-label="${w[1]}">${picHTML(w[2], true)}</button>`; }).join("");
+    cls = " pics";
+  } else {
+    const A = LETTERS[Q.ans];
+    prompt = Q.type === "name"
+      ? `<div class="glyph" lang="ar">${A[0]}</div><h3>Wie heißt dieser Buchstabe?</h3>`
+      : `<h3>Wo ist der Buchstabe ${A[2]}?</h3><button class="say" id="hear">${SPEAK} Anhören</button>`;
+    opts = Q.opts.map(i => Q.type === "name"
+      ? `<button data-i="${i}">${LETTERS[i][2]}<span lang="ar">${LETTERS[i][1]}</span></button>`
+      : `<button data-i="${i}" lang="ar" aria-label="${LETTERS[i][2]}">${LETTERS[i][0]}</button>`).join("");
+    if (Q.type === "find") cls = " glyphs";
+  }
+  box.innerHTML = `<div class="qtop"><span>Frage ${quiz.at + 1} von 10</span><div class="dots">${dots}</div></div>
+    <div class="qprompt">${prompt}</div>
+    <div class="options${cls}" id="opts">${opts}</div>
+    <p class="feedback" id="fb" aria-live="polite"></p>`;
+  const sayIt = () => speak(Q.type === "word" ? Q.T.items[Q.ans][0] : LETTERS[Q.ans][1]);
+  if ($("hear")) { $("hear").onclick = sayIt; sayIt(); }
+  $("opts").querySelectorAll("button").forEach(b => b.onclick = () => answer(b));
+}
+function answer(btn) {
+  const Q = quiz.q[quiz.at], ok = +btn.dataset.i === Q.ans;
+  $("opts").querySelectorAll("button").forEach(b => { b.disabled = true; if (+b.dataset.i === Q.ans) b.classList.add("ok"); });
+  const fb = $("fb");
+  fb.className = "feedback " + (ok ? "ok" : "ko");
+  const right = Q.type === "word" ? Q.T.items[Q.ans][1] : LETTERS[Q.ans][2];
+  if (ok) { fb.textContent = "Richtig! +1 Stern ⭐"; yay(); confetti(40); addStars(1); }
+  else { btn.classList.add("ko"); fb.textContent = `Fast! Richtig ist: ${right}`; oops(); bump(btn, "wiggle"); }
+  if (Q.type !== "word") {
+    speak(LETTERS[Q.ans][1]);
+    const s = state.lstats[Q.ans] || [0, 0]; s[ok ? 0 : 1]++; state.lstats[Q.ans] = s; save();
+  }
+  quiz.res.push(ok);
+  if (quiz.res.length === quiz.q.length) dayAdd("quiz");
+  setTimeout(() => { quiz.at++; renderQuiz(); }, ok ? 1300 : 2200);
+}
+
+// ---------- Koran ----------
+const BASMALA = QURAN[0].v[0][0];
+let sIndex = 1, showDe = true, memo = false, learn = false, revealed = new Set();
+// Rezitation von Scheich Mahmoud Khalil Al-Husary, Vers für Vers (everyayah.com). Wenn die Dateien nicht laden, bleibt der Link zu Quran.com.
+const RECITER = "https://everyayah.com/data/Husary_128kbps/";
+const pad3 = n => String(n).padStart(3, "0");
+const player = new Audio();
+let audioOK = false, playQueue = [], playing = null, repeat = 1, repeatLeft = 0;
+(() => { const probe = new Audio(); probe.preload = "metadata";
+  probe.addEventListener("loadedmetadata", () => { audioOK = true; renderReader(); }, { once: true });
+  probe.src = RECITER + "112001.mp3"; })();
+function stopAudio() { player.pause(); playQueue = []; playing = null; markPlaying(); }
+function markPlaying() { document.querySelectorAll(".verse").forEach(li => li.classList.toggle("playing", playing && +li.dataset.k === playing.k && playing.n === QURAN[sIndex].n)); }
+let curRepeat = 1;
+function playVerses(list, rep = repeat) { stopAudio(); curRepeat = rep; playQueue = list.slice(); repeatLeft = rep; next(); dayAdd("koran"); }
+function next() {
+  if (!playQueue.length) { playing = null; markPlaying(); return; }
+  playing = playQueue[0];
+  player.src = RECITER + pad3(playing.n) + pad3(playing.k + 1) + ".mp3";
+  player.play().catch(() => {});
+  markPlaying();
+  const li = document.querySelector(`.verse[data-k="${playing.k}"]`); if (li) li.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+player.addEventListener("ended", () => {
+  if (--repeatLeft > 0) { player.currentTime = 0; player.play().catch(() => {}); return; }
+  playQueue.shift(); repeatLeft = curRepeat; next();
+});
+player.addEventListener("error", () => { if (playing) { playQueue = []; playing = null; markPlaying(); } });
+try { const s = localStorage.getItem(KEY + "-sura"); if (s !== null && QURAN[+s]) sIndex = +s; } catch (e) {}
+function renderSurahs() {
+  $("koranProgress").textContent = `⭐ ${state.learned.length} von ${QURAN.length} Suren gelernt`;
+  $("surahList").innerHTML = QURAN.map((S, i) =>
+    `<button class="surah${state.learned.includes(S.n) ? " done" : ""}" aria-pressed="${i === sIndex}" data-i="${i}"><span class="no">Sure ${S.n}</span><span lang="ar">${S.ar}</span><b>${S.tr}</b><small>${S.de} · ${S.v.length} Verse</small></button>`).join("");
+  $("surahList").querySelectorAll(".surah").forEach(b => b.onclick = () => {
+    sIndex = +b.dataset.i; revealed = new Set(); stopAudio();
+    try { localStorage.setItem(KEY + "-sura", sIndex); } catch (e) {}
+    renderSurahs(); renderReader();
+  });
+  const sel = $("surahList").querySelector('[aria-pressed="true"]');
+  if (sel) $("surahList").scrollLeft = sel.offsetLeft - 8;
+}
+function renderReader() {
+  const S = QURAN[sIndex], done = state.learned.includes(S.n);
+  const step = Math.min(state.kstep[S.n] || 0, S.v.length);
+  const verses = S.v.map((v, k) => {
+    if (learn && k > step) return "";
+    const words = v[0].split(" "), hide = (memo || (learn && k < step)) && !revealed.has(k), cur = learn && k === step;
+    const text = hide ? `${words[0]} <span class="rest">${words.slice(1).join(" ") || "…"}</span>` : v[0];
+    return `<li class="verse${hide ? " hidden-v" : ""}${cur ? " current" : ""}" data-k="${k}"><div class="vrow">
+      ${audioOK ? `<button class="play" data-play="${k}" aria-label="Vers ${k + 1} anhören">${PLAY}</button>` : ""}<div>
+      <p lang="ar">${text} <span class="num">﴿${arNum(k + 1)}﴾</span></p>
+      ${showDe && !hide ? `<p class="de">${k + 1}. ${v[1]}</p>` : ""}</div></div></li>`;
+  }).join("");
+  $("reader").innerHTML = `
+    <div class="rhead">
+      <h3>Sure ${S.tr}<small>${S.de} · Sure ${S.n} · ${S.v.length} Verse</small></h3>
+      <div class="row">
+        <button class="soft" id="tDe" aria-pressed="${showDe}">Deutsch</button>
+        <button class="soft" id="tMemo" aria-pressed="${memo}">Verse verstecken</button>
+        <button class="soft" id="tLearn" aria-pressed="${learn}">🧠 Schritt für Schritt</button>
+      </div>
+    </div>
+    ${learn ? stepsBox(S, step) : ""}
+    ${S.n !== 1 ? `<p class="basmala" lang="ar">${BASMALA}</p>` : ""}
+    <ol class="verses">${verses}</ol>
+    <div class="actions">
+      ${audioOK ? `<div class="row"><button class="say" id="playAll">${PLAY} Ganze Sure anhören</button><button class="soft" id="rep" aria-pressed="${repeat > 1}">🔁 Jeden Vers 3×</button></div>`
+        : `<a href="https://quran.com/${S.n}" target="_blank" rel="noopener">🎧 Rezitation auf Quran.com anhören ↗</a>`}
+      <button class="learned" id="learned" aria-pressed="${done}">${done ? "Kann ich auswendig ✓" : "Kann ich auswendig (+5 Sterne)"}</button>
+    </div>`;
+  $("tDe").onclick = () => { showDe = !showDe; renderReader(); };
+  $("tMemo").onclick = () => { memo = !memo; learn = false; revealed = new Set(); renderReader(); };
+  $("tLearn").onclick = () => { learn = !learn; memo = false; revealed = new Set(); stopAudio(); renderReader(); };
+  if (learn) wireSteps(S, step);
+  $("reader").querySelectorAll(".hidden-v").forEach(li => li.onclick = e => { if (e.target.closest(".play")) return; revealed.add(+li.dataset.k); renderReader(); });
+  $("reader").querySelectorAll("[data-play]").forEach(b => b.onclick = () => playVerses([{ n: S.n, k: +b.dataset.play }]));
+  if ($("playAll")) $("playAll").onclick = () => playVerses(S.v.map((_, k) => ({ n: S.n, k })));
+  if ($("rep")) $("rep").onclick = () => { repeat = repeat > 1 ? 1 : 3; renderReader(); };
+  markPlaying();
+  $("learned").onclick = () => {
+    if (done) { state.learned = state.learned.filter(n => n !== S.n); addStars(-5); }
+    else { state.learned.push(S.n); addStars(5); confetti(180); yay(); }
+    save(); renderSurahs(); renderReader();
+  };
+}
+
+// Auswendiglernen wie in der Koranschule: einen Vers oft wiederholen (Takrār), dann mit den vorherigen verbinden (Rabṭ)
+function stepsBox(S, step) {
+  const n = S.v.length, pct = Math.round(step / n * 100);
+  if (step >= n) return `<div class="steps"><h4>Alle ${n} Verse geschafft! 🎉</h4>
+    <p>Sag jetzt die ganze Sure ohne Hilfe auf. Wenn es klappt, drücke unten auf „Kann ich auswendig“.</p>
+    <div class="bar"><i style="width:100%"></i></div><div class="row"><button class="soft" id="stReset">↺ Von vorne</button></div></div>`;
+  return `<div class="steps">
+    <h4>Schritt ${step + 1} von ${n}: Vers ${step + 1}</h4>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <p>1. ${audioOK ? "Hör den grünen Vers 3 Mal und sprich leise mit." : "Lies den grünen Vers 3 Mal laut, zusammen mit Mama oder Papa."}</p>
+    <p>2. Sag ihn allein auf, ohne hinzuschauen.</p>
+    ${step > 0 ? `<p>3. Verbinde: sag Vers 1 bis ${step + 1} hintereinander. Die versteckten Verse kannst du antippen.</p>` : ""}
+    <div class="row">
+      ${audioOK ? `<button class="say" id="stHear">${PLAY} Vers ${step + 1} (3×)</button>` : ""}
+      ${audioOK && step > 0 ? `<button class="soft" id="stChain">🔗 Vers 1–${step + 1} hören</button>` : ""}
+      <button class="learned" id="stOk">✅ Kann ich! (+1 ⭐)</button>
+      ${step > 0 ? `<button class="soft" id="stReset">↺ Von vorne</button>` : ""}
+    </div></div>`;
+}
+function wireSteps(S, step) {
+  if ($("stHear")) $("stHear").onclick = () => playVerses([{ n: S.n, k: step }], 3);
+  if ($("stChain")) $("stChain").onclick = () => playVerses(S.v.slice(0, step + 1).map((_, k) => ({ n: S.n, k })), 1);
+  if ($("stOk")) $("stOk").onclick = () => { stopAudio(); state.kstep[S.n] = step + 1; revealed = new Set(); dayAdd("koran"); addStars(1); yay(); if (step + 1 >= S.v.length) confetti(120); save(); renderReader(); };
+  if ($("stReset")) $("stReset").onclick = () => { state.kstep[S.n] = 0; revealed = new Set(); save(); renderReader(); };
+}
+
+// ---------- Mission des Tages ----------
+const dayNo = () => Math.floor(Date.now() / 864e5 - new Date().getTimezoneOffset() / 1440);
+function ensureDay() {
+  const d = today();
+  if (!state.day || state.day.d !== d) state.day = { d, arabic: dayNo() % 2 === 0, newAr: 0, newDe: 0, traces: 0, quiz: 0, count: 0, koran: 0, done: false };
+  return state.day;
+}
+function missionTasks() {
+  const D = ensureDay();
+  if (D.arabic) return [
+    state.seen.length < 28
+      ? { k: "newAr", need: 1, txt: "Lerne 1 neuen arabischen Buchstaben", go: "buchstaben" }
+      : { k: "quiz", need: 1, txt: "Mach ein Buchstaben-Quiz", go: "spiele" },
+    { k: "traces", need: 2, txt: "Schreibe 2 Buchstaben", go: "spuren" },
+    { k: "koran", need: 1, txt: "Übe deine Sure", go: "koran" }];
+  return [
+    state.seenDe.length < 30
+      ? { k: "newDe", need: 1, txt: "Lerne 1 neuen deutschen Buchstaben", go: "abc" }
+      : { k: "quiz", need: 1, txt: "Mach ein Quiz", go: "spiele" },
+    { k: "traces", need: 2, txt: "Schreibe 2 Buchstaben oder Zahlen", go: "spuren" },
+    { k: "count", need: 3, txt: "Zähle richtig: 3 Mal", go: "zahlen" }];
+}
+function dayAdd(k) {
+  const D = ensureDay(); D[k] = (D[k] || 0) + 1;
+  const tasks = missionTasks();
+  if (!D.done && tasks.every(x => D[x.k] >= x.need)) {
+    D.done = true; state.learnDays++; save();
+    setTimeout(() => { confetti(200); yay(); addStars(3); hudhud(withName("Mission geschafft! +3 Sterne 🏆")); }, 900);
+  }
+  save(); renderMission();
+}
+function renderMission() {
+  const D = ensureDay(), tasks = missionTasks();
+  $("mission").innerHTML = `<div class="mission-head"><b>🎯 Mission des Tages</b><span>${D.arabic ? "Heute: Arabisch-Tag 🌙" : "Heute: Deutsch-Tag 🔠"} · ${state.learnDays} Lerntage ⭐</span></div>
+    <div class="tasks">${tasks.map(x => { const ok = (D[x.k] || 0) >= x.need;
+      return `<button class="task${ok ? " done" : ""}" data-go="${x.go}"><span class="box2">${ok ? "✓" : ""}</span><span>${x.txt}${x.need > 1 && !ok ? `<small>${D[x.k] || 0} von ${x.need}</small>` : ""}</span></button>`; }).join("")}</div>
+    ${D.done ? `<p class="note" style="margin:0">Mission geschafft! Jetzt darfst du auf den Spielplatz oder eine Pause machen.</p>` : ""}`;
+  $("mission").querySelectorAll(".task").forEach(b => b.onclick = () => { showTab(b.dataset.go); $("p-" + b.dataset.go).scrollIntoView({ behavior: "smooth", block: "start" }); });
+}
+
+// ---------- Spielplatz ----------
+const STICKERS = ["🐪","🦁","🐘","🦒","🐢","🐬","🦋","🐝","🦉","🐧","🦊","🐼","🌙","⭐","🕌","🌴","🚀","🌈","⚽","🚲","🏰","🎈","🍉","🦄"];
+const GAMES = [
+  { id: "balloons", pic: "🎈", name: "Ballon-Platzen", text: "Platze nur die Ballons mit dem richtigen Buchstaben.", cost: 5, bg: "var(--sea-soft)" },
+  { id: "memory", pic: "🃏", name: "Memory", text: "Finde den Buchstaben und sein Bild.", cost: 5, bg: "var(--leaf-soft)" },
+  { id: "stickers", pic: "📒", name: "Sticker-Album", text: "Kaufe einen Überraschungs-Sticker.", cost: 8, bg: "var(--sun-soft)" }
+];
+let game = null;
+function renderGames() {
+  if (!$("gameCards")) return;
+  $("gameCards").innerHTML = GAMES.map(g => {
+    const full = g.id === "stickers" && state.stickers.length >= STICKERS.length;
+    return `<button class="gcard" data-g="${g.id}" style="background:${g.bg}" ${state.stars < g.cost || full ? "disabled" : ""}>
+      <span class="pic" aria-hidden="true">${g.pic}</span><b>${g.name}</b><small>${g.text}</small>
+      <span class="price">${full ? "Album voll! 🏆" : g.cost + " ⭐"}</span></button>`; }).join("") +
+    (state.stars < 5 ? `<p class="note" style="grid-column:1/-1">Dir fehlen noch Sterne. Lerne Buchstaben, schreibe oder mach ein Quiz, dann kommst du zurück!</p>` : "");
+  $("gameCards").querySelectorAll(".gcard").forEach(b => b.onclick = () => buyGame(b.dataset.g));
+}
+function buyGame(id) {
+  const g = GAMES.find(x => x.id === id);
+  if (state.stars < g.cost) return;
+  state.stars -= g.cost; save(); $("starCount").textContent = state.stars; renderGames();
+  $("gameBox").hidden = false;
+  ({ balloons: startBalloons, memory: startMemory, stickers: buySticker })[id]();
+  $("gameBox").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function stopGame() { if (game && game.stop) game.stop(); game = null; }
+function gameEnd(html) {
+  stopGame();
+  $("gameBox").innerHTML = `<div class="result">${html}</div><button class="big-btn" id="gameDone">Zurück zum Spielplatz</button>`;
+  $("gameDone").onclick = () => { $("gameBox").hidden = true; renderGames(); };
+}
+function startBalloons() {
+  stopGame();
+  const target = Math.floor(Math.random() * 28), T = LETTERS[target];
+  $("gameBox").innerHTML = `<div class="qtop"><span>Platze alle <span lang="ar" style="font-size:1.6rem;color:var(--grape)">${T[0]}</span> (${T[2]})</span><button class="say" id="bSay">${SPEAK} Anhören</button></div>
+    <div class="stage" id="stage"><div class="hud"><span id="bScore">🎈 0</span><span id="bTime">⏱ 45</span></div></div>`;
+  $("bSay").onclick = () => speak(T[1]); speak(T[1]);
+  const stage = $("stage"), cols = ["#ff5c93", "#ff8a2b", "#2fbf68", "#129bdb", "#8b5cf6", "#e0a800"];
+  let score = 0, left = 45, last = performance.now(), spawn = 0, list = [], running = true;
+  function add() {
+    const isT = Math.random() < 0.45, L = isT ? T : LETTERS[(target + 1 + Math.floor(Math.random() * 27)) % 28];
+    const b = document.createElement("button"); b.className = "balloon"; b.setAttribute("aria-label", L[2]);
+    b.innerHTML = `<span class="b" lang="ar" style="background:${cols[Math.floor(Math.random() * cols.length)]}">${L[0]}</span><span class="s"></span>`;
+    const o = { el: b, x: Math.random() * (stage.clientWidth - 74), y: stage.clientHeight + 10, v: 40 + Math.random() * 45 + (45 - left), ok: isT };
+    b.style.left = o.x + "px"; b.style.top = o.y + "px";
+    b.onpointerdown = e => { e.preventDefault(); hit(o); };
+    stage.appendChild(b); list.push(o);
+  }
+  function hit(o) {
+    if (!running || o.dead) return;
+    if (o.ok) {
+      o.dead = true; o.el.remove(); score++; $("bScore").textContent = "🎈 " + score; tone([700 + score * 20]);
+      const fx = document.createElement("span"); fx.className = "pop-fx"; fx.textContent = "💥"; fx.style.left = o.x + 20 + "px"; fx.style.top = o.y + 10 + "px";
+      stage.appendChild(fx); setTimeout(() => fx.remove(), 500);
+    } else { oops(); bump(o.el, "wiggle"); }
+  }
+  function frame(now) {
+    if (!running) return;
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    left -= dt; spawn -= dt;
+    if (spawn <= 0) { add(); spawn = 0.75; }
+    list.forEach(o => { o.y -= o.v * dt; o.el.style.top = o.y + "px"; if (o.y < -100) { o.dead = true; o.el.remove(); } });
+    list = list.filter(o => !o.dead);
+    $("bTime").textContent = "⏱ " + Math.ceil(left);
+    if (left <= 0) { running = false; confetti(); yay(); return gameEnd(`<div class="score">🎈 ${score}</div><p style="margin:0;font-weight:800;font-size:1.3rem">Du hast ${score} Ballons mit ${T[2]} geplatzt!</p>`); }
+    requestAnimationFrame(frame);
+  }
+  game = { stop: () => { running = false; } };
+  requestAnimationFrame(frame);
+}
+function startMemory() {
+  stopGame();
+  const picks = shuffle([...LETTERS.keys()]).slice(0, 6);
+  const cards = shuffle(picks.flatMap(i => [{ i, face: LETTERS[i][0], ar: true }, { i, face: LETTERS[i][6] }]));
+  let open = [], found = 0, tries = 0, lock = false;
+  $("gameBox").innerHTML = `<div class="qtop"><span>Finde die Paare: Buchstabe + Bild</span><span id="mTries">Versuche: 0</span></div>
+    <div class="memory" id="mem">${cards.map((c, k) => `<button class="mcard" data-k="${k}" ${c.ar ? 'lang="ar"' : ""} aria-label="Karte">${c.face}</button>`).join("")}</div>
+    <p class="note">Tipp: ب gehört zu 🚪, weil Tür auf Arabisch بَاب heißt.</p>`;
+  $("mem").querySelectorAll(".mcard").forEach(b => b.onclick = () => {
+    const c = cards[+b.dataset.k];
+    if (lock || b.classList.contains("open") || b.classList.contains("found")) return;
+    b.classList.add("open"); open.push(b);
+    if (c.ar) speak(LETTERS[c.i][1]); else speak(LETTERS[c.i][5]);
+    if (open.length === 2) {
+      tries++; $("mTries").textContent = "Versuche: " + tries;
+      const [a, d] = open.map(x => cards[+x.dataset.k]);
+      if (a.i === d.i) { open.forEach(x => x.classList.replace("open", "found")); open = []; found++; tone([660, 990]);
+        if (found === 6) setTimeout(() => { confetti(150); yay(); gameEnd(`<div class="score">🃏 ${tries}</div><p style="margin:0;font-weight:800;font-size:1.3rem">Alle Paare gefunden, mit ${tries} Versuchen!</p>`); }, 700); }
+      else { lock = true; setTimeout(() => { open.forEach(x => x.classList.remove("open")); open = []; lock = false; }, 1100); }
+    }
+  });
+  game = { stop: () => {} };
+}
+function buySticker() {
+  const free = STICKERS.map((_, i) => i).filter(i => !state.stickers.includes(i));
+  const pick = free[Math.floor(Math.random() * free.length)];
+  state.stickers.push(pick); save(); confetti(); yay();
+  $("gameBox").innerHTML = `<div class="result"><div class="score" style="font-size:5rem">${STICKERS[pick]}</div><p style="margin:0;font-weight:800;font-size:1.3rem">Neuer Sticker für dein Album!</p></div>
+    <div class="album">${STICKERS.map((s, i) => state.stickers.includes(i) ? `<span class="sticker${i === pick ? " new" : ""}">${s}</span>` : `<span class="sticker locked">?</span>`).join("")}</div>
+    <p class="note">${state.stickers.length} von ${STICKERS.length} Stickern gesammelt</p>
+    <button class="big-btn" id="gameDone">Zurück zum Spielplatz</button>`;
+  $("gameDone").onclick = () => { $("gameBox").hidden = true; renderGames(); };
+  game = null;
+}
+
+// ---------- Bildschirmzeit ----------
+const today = () => new Date().toISOString().slice(0, 10);
+function usedSec() { return state.usage[today()] || 0; }
+function checkLimit() {
+  const over = state.limit > 0 && usedSec() >= state.limit * 60;
+  if (over && $("sleepOverlay").hidden) { stopGame(); stopAudio(); try { speechSynthesis.cancel(); } catch (e) {} }
+  $("sleepOverlay").hidden = !over || !$("parentOverlay").hidden;
+}
+let sessionSec = 0;
+const anyOverlay = () => ["sleepOverlay", "parentOverlay", "breakOverlay", "welcomeOverlay"].some(id => !$(id).hidden);
+setInterval(() => {
+  if (document.visibilityState !== "visible" || anyOverlay()) return;
+  const d = today(); state.usage = { [d]: (state.usage[d] || 0) + 15 }; save(); checkLimit();
+  sessionSec += 15;
+  if (state.breakEvery && sessionSec >= state.breakEvery * 60 && $("sleepOverlay").hidden) { sessionSec = 0; movementBreak(); }
+}, 15000);
+// Bewegungspause: kurz aufstehen hilft beim Konzentrieren
+function movementBreak() {
+  stopGame(); stopAudio();
+  let n = 20; $("breakCount").textContent = n; $("breakDone").disabled = true; $("breakOverlay").hidden = false;
+  const iv = setInterval(() => { n--; $("breakCount").textContent = Math.max(0, n); if (n <= 0) { clearInterval(iv); $("breakDone").disabled = false; yay(); } }, 1000);
+}
+$("breakDone").onclick = () => { $("breakOverlay").hidden = true; hudhud("Super geflattert! Weiter geht's 🐦"); };
+function applyName() {
+  $("helloAr").textContent = state.arName ? `أَهْلًا ${state.arName}!` : "أَهْلًا!";
+  $("helloDe").textContent = state.name ? `Hallo ${state.name}!` : "Hallo!";
+  nameTraceItem(); renderTraceChips();
+}
+function askName() {
+  $("nameIn").value = state.name; $("arNameIn").value = state.arName;
+  $("welcomeOverlay").hidden = false;
+}
+$("welcomeForm").onsubmit = e => {
+  e.preventDefault();
+  state.name = $("nameIn").value.trim().slice(0, 30);
+  state.arName = $("arNameIn").value.trim().replace(/[^\u0600-\u06FF\s]/g, "").slice(0, 20);
+  save(); $("welcomeOverlay").hidden = true; applyName(); checkLimit();
+  hudhud(withName("Salām! Ich bin Hudhud. Los geht's!"));
+};
+
+// ---------- Elternbereich (auf Französisch für die Eltern) ----------
+function openParent() {
+  const a = 3 + Math.floor(Math.random() * 7), b = 4 + Math.floor(Math.random() * 6);
+  $("parentOverlay").hidden = false; $("sleepOverlay").hidden = true;
+  $("parentSheet").innerHTML = `<h2>Espace parents 🔒</h2><p>Pour entrer, combien font ${a} × ${b} ?</p>
+    <form id="gate" class="row"><input id="gateIn" inputmode="numeric" autocomplete="off" aria-label="Réponse"><button class="say c-sea" style="--c:var(--sea)">Entrer</button><button type="button" class="soft" id="gateClose">Fermer</button></form><p class="note" id="gateMsg"></p>`;
+  $("gateIn").focus();
+  $("gate").onsubmit = e => { e.preventDefault(); if (+$("gateIn").value === a * b) parentHome(); else $("gateMsg").textContent = "Ce n'est pas la bonne réponse."; };
+  $("gateClose").onclick = closeParent;
+}
+function closeParent() { $("parentOverlay").hidden = true; checkLimit(); }
+function parentHome() {
+  const used = Math.floor(usedSec() / 60);
+  $("parentSheet").innerHTML = `<h2>Espace parents</h2>
+    <p>Aujourd'hui, ${state.name || "votre enfant"} a utilisé Hudhud pendant <span class="usage">${used} min</span>${state.limit ? ` sur <span class="usage">${state.limit} min</span> autorisées` : ""}.</p>
+    <h3>Limite par jour</h3>
+    <div class="limits" id="limits">${[10, 15, 20, 30, 45, 0].map(m => `<button class="soft" style="--c:var(--sea);--cs:var(--sea-soft)" aria-pressed="${state.limit === m}" data-m="${m}">${m ? m + " min" : "Sans limite"}</button>`).join("")}</div>
+    <div class="row"><button class="soft" id="plus10">+10 min pour aujourd'hui</button><button class="soft" id="resetDay">Remettre le compteur du jour à zéro</button></div>
+    <p class="note">Quand la limite est atteinte, Hudhud « s'endort » et l'application se bloque jusqu'au lendemain. Le temps n'est compté que quand l'application est ouverte à l'écran.</p>
+    <h3>Pause pour bouger</h3>
+    <div class="limits" id="breaks">${[5, 10, 15, 0].map(m => `<button class="soft" style="--c:var(--sea);--cs:var(--sea-soft)" aria-pressed="${state.breakEvery === m}" data-m="${m}">${m ? "Toutes les " + m + " min" : "Jamais"}</button>`).join("")}</div>
+    <p class="note">Hudhud propose 20 secondes de mouvement (battre des ailes, sauter). Bouger un peu aide à rester concentré.</p>
+    <h3>Prénom</h3>
+    <div class="row"><span>${state.name || "—"} ${state.arName ? "· " + state.arName : ""}</span><button class="soft" id="rename">Modifier</button></div>
+    <h3>Progrès</h3>
+    <p>Arabe : ${state.seen.length}/28 lettres découvertes · Allemand : ${state.seenDe.length}/30 lettres, ${state.seenNum.length}/21 nombres · ${state.traced.length}/${traceTotal()} tracés réussis · ${state.learned.length}/38 sourates apprises · ${state.stickers.length}/24 stickers · ${state.stars} étoiles</p>
+    <h3>Conseils pour un enfant de 6 ans</h3>
+    <p class="note">Conseil d'organisation : un jour « arabe » (lettres, Coran), un jour « allemand » (ABC, nombres), avec un seul objectif court par séance.</p>
+    <ul>
+      <li>Méthode d'apprentissage intégrée : une mission courte par jour, des répétitions espacées (le quiz revient plus souvent sur les lettres ratées), voir, entendre et tracer chaque lettre, et pour le Coran la méthode traditionnelle de répétition puis d'enchaînement des versets.</li>
+      <li>Les pédiatres allemands conseillent au maximum 30 à 45 minutes d'écran de loisir par jour entre 6 et 9 ans, et pas tous les jours. La commission française « Enfants et écrans » demande un usage modéré, avec un adulte présent. 15 à 20 minutes de Hudhud suffisent.</li>
+      <li>Restez à côté de lui : un enfant apprend beaucoup mieux quand un adulte participe, parle et répète avec lui.</li>
+      <li>Pas d'écran au lit ni pendant l'heure qui précède le coucher. À 6 ans, il lui faut 9 à 12 heures de sommeil.</li>
+      <li>Pas d'écran pendant les repas. Au moins une heure par jour de jeu actif dehors.</li>
+      <li>Activez « Accès guidé » sur l'iPhone pour qu'il ne puisse pas quitter Hudhud.</li>
+      <li>Le Coran s'apprend le mieux avec un enseignant et en récitant à voix haute. L'application sert à réviser.</li>
+    </ul>
+    <h3>Sauvegarde des progrès</h3>
+    <p class="note">Les progrès sont enregistrés seulement sur cet appareil. Copiez ce code et gardez-le (par exemple dans vos notes) pour le restaurer sur un autre appareil ou après une réinstallation.</p>
+    <textarea id="backup" readonly aria-label="Code de sauvegarde"></textarea>
+    <div class="row"><button class="soft" id="copyBackup">Copier le code</button></div>
+    <textarea id="restoreIn" aria-label="Coller un code de sauvegarde" placeholder="Collez ici un code de sauvegarde"></textarea>
+    <div class="row"><button class="soft" id="restore">Restaurer</button><span class="note" id="restoreMsg"></span></div>
+    <div class="row"><button class="big-btn" id="parentClose">Retour à Hudhud</button></div>
+    <details><summary class="note">Tout effacer</summary><p class="note">Efface toutes les étoiles et tous les progrès sur cet appareil.</p><button class="soft" id="wipe" style="border-color:var(--bad);color:var(--bad)">Oui, tout effacer</button></details>`;
+  $("limits").querySelectorAll("button").forEach(b => b.onclick = () => { state.limit = +b.dataset.m; save(); parentHome(); });
+  $("plus10").onclick = () => { state.usage[today()] = Math.max(0, usedSec() - 600); save(); parentHome(); };
+  $("resetDay").onclick = () => { state.usage[today()] = 0; save(); parentHome(); };
+  $("parentClose").onclick = closeParent;
+  $("breaks").querySelectorAll("button").forEach(b => b.onclick = () => { state.breakEvery = +b.dataset.m; save(); parentHome(); });
+  $("rename").onclick = () => { $("parentOverlay").hidden = true; askName(); };
+  try { $("backup").value = "HUDHUD1:" + btoa(unescape(encodeURIComponent(JSON.stringify(state)))); } catch (e) {}
+  $("copyBackup").onclick = () => { const v = $("backup").value; (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => { $("copyBackup").textContent = "Copié ✓"; }).catch(() => { $("backup").select(); }); };
+  $("restore").onclick = () => {
+    try {
+      const v = $("restoreIn").value.trim();
+      if (!v.startsWith("HUDHUD1:")) throw 0;
+      const s = JSON.parse(decodeURIComponent(escape(atob(v.slice(8)))));
+      if (typeof s !== "object" || typeof s.stars !== "number") throw 0;
+      state = { ...state, ...s }; save(); location.reload();
+    } catch (e) { $("restoreMsg").textContent = "Ce code n'est pas valide. Vérifiez qu'il est copié en entier."; }
+  };
+  $("wipe").onclick = () => { state = { stars: 0, seen: [], traced: [], learned: [], stickers: [], usage: {}, limit: state.limit, seenDe: [], seenNum: [], name: state.name, arName: state.arName, day: null, learnDays: 0, lstats: {}, kstep: {}, breakEvery: state.breakEvery }; save(); location.reload(); };
+}
+$("parentBtn").onclick = openParent;
+$("sleepParent").onclick = openParent;
+checkLimit();
+
+renderAbc(false); renderNumbers(); newCount(); renderMission(); applyName();
+if (!state.name) askName();
+renderGrid(); selectLetter(0, false); renderGames(); renderHarakat(); renderTraceChips(); renderVocab(); renderSurahs(); renderReader();
+showTab((location.hash || "").slice(1));
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
