@@ -351,6 +351,25 @@ button, a, input { touch-action: manipulation }
 .welcome input, .sheet textarea { font: inherit; font-size: 1.15rem; width: 100%; padding: 8px 12px; border: 3px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink) }
 .sheet textarea { font-size: .8rem; min-height: 5em; font-family: ui-monospace, monospace }
 .field { display: grid; gap: 4px; font-weight: 600 }
+/* Navigation: Startseite, Welten mit fester Kopfleiste, Spiele im Vollbild */
+.home { display: grid; gap: 18px }
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; gap: 10px; padding: 8px 0; background: var(--sky) }
+.topbar .back { border: 0; background: var(--card); border-radius: 999px; padding: 8px 16px 8px 12px; font-weight: 800; font-size: 1.05rem; box-shadow: 0 4px 0 var(--line); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-height: 44px }
+.topbar .back .pic { font-size: 1.3rem; line-height: 1 }
+.topbar b { flex: 1; min-width: 0; font-size: 1.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.mini-stars { background: var(--card); border: 3px solid var(--sun); border-radius: 999px; padding: 2px 12px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 21; background: var(--sky) }
+.game-screen { position: fixed; inset: 0; z-index: 30; background: var(--sky); display: flex; flex-direction: column; gap: 8px;
+  padding-top: max(10px, env(safe-area-inset-top, 0px)); padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)) }
+.game-top { display: flex; align-items: center; gap: 10px; flex: none }
+.game-top b { flex: 1; min-width: 0; font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.game-top .close { border: 0; background: var(--card); border-radius: 999px; padding: 8px 16px; font-weight: 800; box-shadow: 0 4px 0 var(--line); min-height: 44px; white-space: nowrap }
+.game-body { --c: var(--grape); --cs: var(--grape-soft); flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch; max-width: 760px; width: 100%; margin: 0 auto }
+.game-body > .runner, .game-body > .pond, .game-body > .stage { flex: 1 1 auto; height: auto; min-height: 280px }
+.game-body .qtop { flex: none }
+.game-body .run-help { flex: none; font-size: .85rem }
+body.no-scroll { overflow: hidden }
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -365,6 +384,12 @@ button, a, input { touch-action: manipulation }
 
 <canvas id="confetti" aria-hidden="true"></canvas>
 <div class="wrap">
+  <div class="topbar" id="topbar" hidden>
+    <button class="back" id="backHome" aria-label="Zurück zur Startseite"><span class="pic" aria-hidden="true">‹</span>Start</button>
+    <b id="topTitle"></b>
+    <span class="mini-stars">⭐ <span id="topStars">0</span></span>
+  </div>
+  <div class="home" id="home">
   <header class="hello">
     <div class="brand">
       <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">  <g transform="translate(56 40)">
@@ -421,6 +446,7 @@ button, a, input { touch-action: manipulation }
     <button role="tab" id="tab-zahlen" data-tab="zahlen" class="c-mint"><span class="pic" aria-hidden="true">🔢</span>Zahlen<span class="de-sub">Deutsch</span></button>
   </nav>
   <button class="playground-btn" role="tab" id="tab-spielplatz" data-tab="spielplatz"><span class="pic" aria-hidden="true">🎪</span><span>Spielplatz<small>Tausche deine Sterne gegen Spiele und Sticker</small></span><span class="cost">ab 5 ⭐</span></button>
+  </div>
 
   <!-- BUCHSTABEN -->
   <section class="panel c-sun" id="p-buchstaben" role="tabpanel" aria-labelledby="tab-buchstaben">
@@ -520,8 +546,13 @@ button, a, input { touch-action: manipulation }
     <div class="band c-grape"><div><h2>Spielplatz <span lang="ar">المَلْعَب</span></h2>
       <p>Hier bezahlst du mit deinen Sternen. Lernen bringt Sterne, Spielen kostet Sterne.</p></div></div>
     <div class="games" id="gameCards"></div>
-    <div class="box" id="gameBox" hidden></div>
+
   </section>
+</div>
+
+<div class="game-screen" id="gameScreen" hidden role="dialog" aria-label="Spiel">
+  <div class="game-top"><b id="gameTitle"></b><span class="mini-stars">⭐ <span id="gameStars">0</span></span><button class="close" id="gameClose">✕ Beenden</button></div>
+  <div class="game-body" id="gameBox"></div>
 </div>
 
 <div class="overlay" id="sleepOverlay" hidden>
@@ -829,9 +860,16 @@ function tick() {
 
 // ---------- Welten ----------
 const TABS = ["buchstaben", "vokale", "spuren", "woerter", "spiele", "koran", "abc", "zahlen", "spielplatz"];
+const TITLES = { buchstaben: "🔤 Buchstaben", vokale: "🎵 Vokale", spuren: "✏️ Schreiben", woerter: "🦁 Wörter", spiele: "🧠 Quiz", koran: "📖 Koran", abc: "🔠 ABC", zahlen: "🔢 Zahlen", spielplatz: "🎪 Spielplatz" };
 function showTab(t) {
-  if (!TABS.includes(t)) t = "buchstaben";
+  if (t !== "home" && !TABS.includes(t)) t = "home";
+  const home = t === "home";
+  $("home").hidden = !home; $("topbar").hidden = home;
   TABS.forEach(x => { $("p-" + x).hidden = x !== t; $("tab-" + x).setAttribute("aria-selected", x === t); });
+  $("topTitle").textContent = TITLES[t] || "";
+  window.scrollTo(0, 0);
+  if (!$("gameScreen").hidden && t !== "spielplatz") closeGame();
+  if (home) renderMission();
   try { history.replaceState(null, "", "#" + t); } catch (e) {}
   if (t === "spuren") requestAnimationFrame(() => { setupPad(); });
   else stopDemo();
@@ -840,6 +878,19 @@ function showTab(t) {
   if (t !== "koran") stopAudio();
 }
 document.querySelectorAll(".worlds button, .playground-btn").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+$("backHome").onclick = () => showTab("home");
+// Sternezahl überall gleich anzeigen
+new MutationObserver(() => { $("topStars").textContent = $("gameStars").textContent = $("starCount").textContent; })
+  .observe($("starCount"), { childList: true, characterData: true, subtree: true });
+function openGame(title) {
+  $("gameTitle").textContent = title; $("gameScreen").hidden = false; document.body.classList.add("no-scroll");
+  $("gameStars").textContent = state.stars;
+}
+function closeGame() {
+  stopGame(); try { speechSynthesis.cancel(); } catch (e) {}
+  $("gameScreen").hidden = true; document.body.classList.remove("no-scroll"); $("gameBox").innerHTML = ""; renderGames();
+}
+$("gameClose").onclick = closeGame;
 
 // ---------- Buchstaben ----------
 function forms(L) {
@@ -1379,7 +1430,7 @@ function renderMission() {
     <div class="tasks">${tasks.map(x => { const ok = (D[x.k] || 0) >= x.need;
       return `<button class="task${ok ? " done" : ""}" data-go="${x.go}"><span class="box2">${ok ? "✓" : ""}</span><span>${x.txt}${x.need > 1 && !ok ? `<small>${D[x.k] || 0} von ${x.need}</small>` : ""}</span></button>`; }).join("")}</div>
     ${D.done ? `<p class="note" style="margin:0">Mission geschafft! Jetzt darfst du auf den Spielplatz oder eine Pause machen.</p>` : ""}`;
-  $("mission").querySelectorAll(".task").forEach(b => b.onclick = () => { showTab(b.dataset.go); $("p-" + b.dataset.go).scrollIntoView({ behavior: "smooth", block: "start" }); });
+  $("mission").querySelectorAll(".task").forEach(b => b.onclick = () => showTab(b.dataset.go));
 }
 
 // Buchstaben, die sich ähnlich sehen: als Ablenker trainieren sie genaues Hinschauen
@@ -1414,15 +1465,14 @@ function buyGame(id) {
   const g = GAMES.find(x => x.id === id);
   if (state.stars < g.cost) return;
   state.stars -= g.cost; save(); $("starCount").textContent = state.stars; renderGames();
-  $("gameBox").hidden = false;
+  openGame(g.pic + " " + g.name);
   ({ balloons: startBalloons, memory: startMemory, runner: startRunner, fishing: startFishing, stickers: buySticker })[id]();
-  $("gameBox").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function stopGame() { if (game && game.stop) game.stop(); game = null; }
 function gameEnd(html) {
   stopGame();
   $("gameBox").innerHTML = `<div class="result">${html}</div><button class="big-btn" id="gameDone">Zurück zum Spielplatz</button>`;
-  $("gameDone").onclick = () => { $("gameBox").hidden = true; renderGames(); };
+  $("gameDone").onclick = closeGame;
 }
 function startBalloons() {
   stopGame();
@@ -1617,7 +1667,7 @@ function startRunner() {
     $("runAgain").onclick = () => buyGame("runner");
     $("runWord").onclick = () => speak(T[5]);
     setTimeout(() => speak(T[5]), 900);
-    $("gameDone").onclick = () => { $("gameBox").hidden = true; renderGames(); };
+    $("gameDone").onclick = closeGame;
   }
   function cleanup() { removeEventListener("keydown", onKey); removeEventListener("resize", size); clearInterval(musicIv); }
 
@@ -2067,7 +2117,7 @@ function buySticker() {
     <div class="album">${STICKERS.map((s, i) => state.stickers.includes(i) ? `<span class="sticker${i === pick ? " new" : ""}">${s}</span>` : `<span class="sticker locked">?</span>`).join("")}</div>
     <p class="note">${state.stickers.length} von ${STICKERS.length} Stickern gesammelt</p>
     <button class="big-btn" id="gameDone">Zurück zum Spielplatz</button>`;
-  $("gameDone").onclick = () => { $("gameBox").hidden = true; renderGames(); };
+  $("gameDone").onclick = closeGame;
   game = null;
 }
 
