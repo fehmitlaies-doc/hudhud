@@ -297,6 +297,13 @@ button, a, input { touch-action: manipulation }
 .runner .goal { top: 60px }
 .run-end .big-coin { width: 6.5rem; height: 6.5rem; border-radius: 50%; display: grid; place-items: center; font-size: 3.6rem; font-weight: 800; color: #6b3fd6; background: radial-gradient(circle at 35% 30%, #fff, #ffe9a8); border: 6px solid #f0b316; box-shadow: 0 0 30px rgba(255,200,61,.7) }
 @media (prefers-reduced-motion: no-preference) { .run-end .big-coin { animation: pop .7s ease 2 } }
+.pond { position: relative; width: 100%; height: min(64vh, 520px); border-radius: 24px; overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none; background: #4cc2e8 }
+.pond canvas { display: block; width: 100%; height: 100% }
+.pond .hud { position: absolute; inset: 12px 12px auto; display: flex; justify-content: space-between; align-items: center; gap: 8px; pointer-events: none; font-weight: 800 }
+.pond .hud > span { background: rgba(255,255,255,.92); border-radius: 999px; padding: 2px 12px; box-shadow: 0 3px 0 rgba(29,42,77,.12); white-space: nowrap }
+.pond .hud .fishes { letter-spacing: 1px }
+.pond .hud button { white-space: nowrap; pointer-events: auto; border: 0; background: var(--sun); color: var(--ink); border-radius: 999px; padding: 4px 14px; font-weight: 800; box-shadow: 0 3px 0 #e0a800 }
+.pond .hud b { font-size: 1.6rem; color: var(--grape); line-height: 1; vertical-align: middle }
 .run-help { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--muted); font-weight: 600; font-size: .95rem; margin: 0 }
 .album { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px }
 .sticker { aspect-ratio: 1; border-radius: 20px; display: grid; place-items: center; font-size: 2.6rem; background: var(--card); box-shadow: 0 4px 0 var(--line); max-width: 100% }
@@ -1375,11 +1382,20 @@ function renderMission() {
   $("mission").querySelectorAll(".task").forEach(b => b.onclick = () => { showTab(b.dataset.go); $("p-" + b.dataset.go).scrollIntoView({ behavior: "smooth", block: "start" }); });
 }
 
+// Buchstaben, die sich ähnlich sehen: als Ablenker trainieren sie genaues Hinschauen
+const LOOKALIKE = [[1, 2, 3, 24, 27], [4, 5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19, 20], [0, 22, 21], [23, 25, 26]];
+function wrongFor(target) {
+  const fam = (LOOKALIKE.find(f => f.includes(target)) || []).filter(i => i !== target);
+  if (fam.length && Math.random() < 0.5) return fam[Math.floor(Math.random() * fam.length)];
+  let i; do { i = Math.floor(Math.random() * 28); } while (i === target); return i;
+}
+
 // ---------- Spielplatz ----------
 const STICKERS = ["🐪","🦁","🐘","🦒","🐢","🐬","🦋","🐝","🦉","🐧","🦊","🐼","🌙","⭐","🕌","🌴","🚀","🌈","⚽","🚲","🏰","🎈","🍉","🦄"];
 const GAMES = [
   { id: "balloons", pic: "🎈", name: "Ballon-Platzen", text: "Platze nur die Ballons mit dem richtigen Buchstaben.", cost: 5, bg: "var(--sea-soft)" },
   { id: "runner", pic: "🏃", name: "Hudhud-Rennen", text: "Weiche den Zügen aus und sammle den richtigen Buchstaben.", cost: 5, bg: "var(--rose-soft)" },
+  { id: "fishing", pic: "🎣", name: "Buchstaben-Angeln", text: "Hör gut zu und angle den richtigen Fisch. Ganz in Ruhe.", cost: 5, bg: "var(--sea-soft)" },
   { id: "memory", pic: "🃏", name: "Memory", text: "Finde den Buchstaben und sein Bild.", cost: 5, bg: "var(--leaf-soft)" },
   { id: "stickers", pic: "📒", name: "Sticker-Album", text: "Kaufe einen Überraschungs-Sticker.", cost: 8, bg: "var(--sun-soft)" }
 ];
@@ -1399,7 +1415,7 @@ function buyGame(id) {
   if (state.stars < g.cost) return;
   state.stars -= g.cost; save(); $("starCount").textContent = state.stars; renderGames();
   $("gameBox").hidden = false;
-  ({ balloons: startBalloons, memory: startMemory, runner: startRunner, stickers: buySticker })[id]();
+  ({ balloons: startBalloons, memory: startMemory, runner: startRunner, fishing: startFishing, stickers: buySticker })[id]();
   $("gameBox").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function stopGame() { if (game && game.stop) game.stop(); game = null; }
@@ -1492,7 +1508,7 @@ function startRunner() {
       <div class="timebar"><i id="rBar"></i></div>
       <div class="hud"><span id="rHearts">❤️❤️❤️</span><span class="coin-pill"><b lang="ar">${T[0]}</b><span id="rScore">0</span></span><button class="mute" id="rMute" aria-label="Musik an oder aus">${state.music ? "🎵" : "🔇"}</button></div>
       <div class="goal">Sammle <b lang="ar">${T[0]}</b> ${T[2]}</div></div>
-    <p class="run-help"><span>👈 👉 Wischen oder links/rechts tippen: Gleis wechseln</span><span>👆 Nach oben wischen oder Mitte tippen: springen</span><span>⭐ Stern = Schutzschild</span></p>
+    <p class="run-help"><span>👈 👉 Wischen oder links/rechts tippen: Gleis wechseln</span><span>👆 Nach oben wischen oder Mitte tippen: springen</span><span>⭐ Stern = Schutzschild</span><span>🪙 Über Hürden springen: Münzen in der Luft!</span></p>
     <div class="row"><button class="say" id="rSay">${SPEAK} ${T[2]} anhören</button></div>`;
   $("rSay").onclick = () => speak(T[1]); speak(T[1]);
   const box = $("run"), cv = $("runCv"), ctx = cv.getContext("2d");
@@ -1503,8 +1519,8 @@ function startRunner() {
   try { const s = new XMLSerializer().serializeToString(document.querySelector(".mascot")); bird.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent((s.includes("xmlns=") ? s : s.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"')).replace("<svg", '<svg width="240" height="240"')); } catch (e) {}
   const others = [...LETTERS.keys()].filter(i => i !== target);
   const TRAINS = [["#1f7fe0", "#ffd23d"], ["#e5484d", "#ffffff"], ["#2fbf68", "#ffd23d"], ["#8b5cf6", "#ff8a2b"], ["#ff8a2b", "#ffffff"]];
-  const R = { lane: 0, x: 0, y: 0, vy: 0, hearts: 3, score: 0, time: 60, speed: 7.5, dist: 0, next: 4, inv: 0, shield: 0, squash: 0, dustT: 0,
-    count: 3.6, objs: [], deco: [], fx: [], texts: [], running: true, last: performance.now(), shake: 0, clock: 0,
+  const R = { lane: 0, x: 0, y: 0, vy: 0, hearts: 3, score: 0, time: 60, speed: 5.5, dist: 0, next: 4, inv: 0, shield: 0, squash: 0, dustT: 0,
+    count: 3.6, gulls: Array.from({ length: 3 }, () => ({ x: Math.random(), y: 0.1 + Math.random() * 0.12, v: 0.03 + Math.random() * 0.03, ph: Math.random() * 6 })), objs: [], deco: [], fx: [], texts: [], running: true, last: performance.now(), shake: 0, clock: 0,
     clouds: Array.from({ length: 5 }, (_, i) => ({ x: Math.random(), y: 0.08 + Math.random() * 0.17, s: 0.6 + Math.random() * 0.7, v: 0.004 + Math.random() * 0.006 })) };
   const PD = 0.8, FAR = 24;
   const proj = d => 1 / (1 + Math.max(-0.6, d) * 0.3);
@@ -1536,15 +1552,20 @@ function startRunner() {
   // ---- Welt ----
   function spawnRow() {
     const d = FAR, r = Math.random(), lanes = shuffle([-1, 0, 1]);
-    const letter = (lane, dd = d) => R.objs.push({ kind: "letter", lane, d: dd, ch: Math.random() < 0.55 ? target : others[Math.floor(Math.random() * others.length)], ph: Math.random() * 6 });
+    const letter = (lane, dd = d, h = 0, pGood = 0.55) => R.objs.push({ kind: "letter", lane, d: dd, h, ch: Math.random() < pGood ? target : wrongFor(target), ph: Math.random() * 6 });
     if (r < 0.3) { R.objs.push({ kind: "train", lane: lanes[0], d, len: 2.4, c: TRAINS[Math.floor(Math.random() * TRAINS.length)] }); letter(lanes[1]); if (Math.random() < 0.5) letter(lanes[2]); }
-    else if (r < 0.55) { R.objs.push({ kind: "hurdle", lane: lanes[0], d }); if (Math.random() < 0.4) R.objs.push({ kind: "hurdle", lane: lanes[1], d }); letter(lanes[2]); }
+    else if (r < 0.55) {
+      R.objs.push({ kind: "hurdle", lane: lanes[0], d });
+      // Bogen aus Münzen über der Hürde: wer springt, sammelt sie ein
+      letter(lanes[0], d - 0.9, 0.55, 0.75); letter(lanes[0], d, 1.0, 0.75); letter(lanes[0], d + 0.9, 0.55, 0.75);
+      if (Math.random() < 0.3) R.objs.push({ kind: "hurdle", lane: lanes[1], d }); else letter(lanes[1]);
+    }
     else if (r < 0.6 && R.shield <= 0) { R.objs.push({ kind: "star", lane: lanes[0], d }); letter(lanes[1]); }
     else { letter(lanes[0]); letter(lanes[0], d + 1.6); letter(lanes[0], d + 3.2); if (Math.random() < 0.5) letter(lanes[1]); }
     for (let k = 0; k < 2; k++) if (Math.random() < 0.8) R.deco.push({ side: k ? 1 : -1, d: d + Math.random() * 3, kind: ["palm", "palm", "house", "cactus", "flower"][Math.floor(Math.random() * 5)] });
   }
   function move(dir) { const n = Math.max(-1, Math.min(1, R.lane + dir)); if (n !== R.lane) { R.lane = n; tone([520]); } }
-  function jump() { if (R.y <= 0.01 && R.count <= 0) { R.vy = 6.4; tone([620, 820]); } }
+  function jump() { if (R.y <= 0.01 && R.count <= 0) { R.vy = 6.0; tone([620, 820]); } }
   let sx0 = 0, sy0 = 0;
   box.onpointerdown = e => { if (e.target.closest(".mute")) return; e.preventDefault(); sx0 = e.clientX; sy0 = e.clientY; };
   box.onpointerup = e => {
@@ -1587,12 +1608,15 @@ function startRunner() {
         <div class="score">${R.score} ×</div>
         <p style="margin:0;font-weight:800;font-size:1.3rem">${msg}</p>
         <p class="note">${R.score ? `Du hast ${R.score} Mal ${T[2]} gesammelt.` : ""} ${rec ? "Neuer Rekord!" : "Dein Rekord: " + state.runBest}</p>
+        <button class="word" id="runWord" style="border:0;cursor:pointer"><span class="pic" aria-hidden="true">${T[6]}</span><span><span lang="ar" style="font-size:1.8rem;font-weight:800">${T[5]}</span><br><span class="note">${T[0]} wie ${T[7]}</span></span></button>
       </div>
       <div class="row" style="justify-content:center">
         <button class="big-btn" id="runAgain" ${state.stars < 5 ? "disabled" : ""}>Nochmal laufen (5 ⭐)</button>
         <button class="soft" id="gameDone">Zurück zum Spielplatz</button>
       </div>`;
     $("runAgain").onclick = () => buyGame("runner");
+    $("runWord").onclick = () => speak(T[5]);
+    setTimeout(() => speak(T[5]), 900);
     $("gameDone").onclick = () => { $("gameBox").hidden = true; renderGames(); };
   }
   function cleanup() { removeEventListener("keydown", onKey); removeEventListener("resize", size); clearInterval(musicIv); }
@@ -1634,6 +1658,12 @@ function startRunner() {
     ctx.fillStyle = g; ctx.fillRect(sunX - sr * 3, sunY - sr * 3, sr * 6, sr * 6);
     ctx.fillStyle = "#ffd23d"; ctx.beginPath(); ctx.arc(sunX, sunY, sr, 0, 7); ctx.fill();
     R.clouds.forEach(c => { c.x -= c.v * dt * (R.count > 0 ? 0.3 : 1 + R.speed / 10); if (c.x < -0.2) c.x = 1.2; cloud(c.x * Wd, c.y * Ht, c.s * Ht * 0.035); });
+    R.gulls.forEach(b => {
+      b.x += b.v * dt * 0.4; if (b.x > 1.1) { b.x = -0.1; b.y = 0.08 + Math.random() * 0.14; }
+      const gx = b.x * Wd, gy = b.y * Ht, w = 9 * dpr, f = Math.sin(R.clock * 8 + b.ph) * 4 * dpr;
+      ctx.strokeStyle = "rgba(29,42,77,.55)"; ctx.lineWidth = 2 * dpr; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(gx - w, gy - f); ctx.quadraticCurveTo(gx - w / 2, gy - 4 * dpr, gx, gy); ctx.quadraticCurveTo(gx + w / 2, gy - 4 * dpr, gx + w, gy - f); ctx.stroke();
+    });
     skyline(h);
     dunes(h + 2, Ht * 0.05, "#f1cf9b", 0.01, 7);
     dunes(h + Ht * 0.04, Ht * 0.04, "#ecc07f", 0.025, 11);
@@ -1654,6 +1684,10 @@ function startRunner() {
       ctx.strokeStyle = "#8d99a6"; ctx.lineWidth = 5 * dpr; ctx.beginPath(); ctx.moveTo(sx(l + o, FAR), sy(FAR)); ctx.lineTo(sx(l + o, -0.6), sy(-0.6)); ctx.stroke();
       ctx.strokeStyle = "#eef3f7"; ctx.lineWidth = 2 * dpr; ctx.beginPath(); ctx.moveTo(sx(l + o, FAR), sy(FAR) - 1); ctx.lineTo(sx(l + o, -0.6), sy(-0.6) - 2 * dpr); ctx.stroke();
     }));
+    // weicher Lichtstreifen auf Hudhuds Gleis
+    const gl = ctx.createLinearGradient(0, sy(6), 0, Ht);
+    gl.addColorStop(0, "rgba(255,255,255,0)"); gl.addColorStop(1, "rgba(255,255,255,.22)");
+    poly([[sx(R.x - 0.48, 6), sy(6)], [sx(R.x + 0.48, 6), sy(6)], [sx(R.x + 0.48, -0.6), sy(-0.6)], [sx(R.x - 0.48, -0.6), sy(-0.6)]], gl);
     // leichter Dunst am Horizont
     g = ctx.createLinearGradient(0, h, 0, h + Ht * 0.12); g.addColorStop(0, "rgba(255,240,215,.75)"); g.addColorStop(1, "rgba(255,240,215,0)");
     ctx.fillStyle = g; ctx.fillRect(0, h, Wd, Ht * 0.12);
@@ -1732,8 +1766,8 @@ function startRunner() {
   }
   function drawLetter(o) {
     const p = proj(o.d), x = sx(o.lane, o.d), y = sy(o.d), s = LW() * p, r = s * 0.25;
-    const cy = y - s * 0.48 + Math.sin(R.clock * 4 + o.ph) * s * 0.04, sq = 0.85 + 0.15 * Math.abs(Math.cos(R.clock * 2 + o.ph));
-    ctx.fillStyle = "rgba(0,0,0,.13)"; ctx.beginPath(); ctx.ellipse(x, y, r * 0.8, r * 0.18, 0, 0, 7); ctx.fill();
+    const cy = y - s * 0.48 - (o.h || 0) * s * 0.55 + Math.sin(R.clock * 4 + o.ph) * s * 0.04, sq = 0.85 + 0.15 * Math.abs(Math.cos(R.clock * 2 + o.ph));
+    ctx.fillStyle = "rgba(0,0,0,.13)"; ctx.beginPath(); ctx.ellipse(x, y, r * 0.8 / (1 + (o.h || 0)), r * 0.18 / (1 + (o.h || 0)), 0, 0, 7); ctx.fill();
     ctx.save(); ctx.translate(x, cy); ctx.scale(sq, 1);
     const g = ctx.createRadialGradient(-r * 0.3, -r * 0.35, r * 0.1, 0, 0, r);
     g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#ffe9a8");
@@ -1780,8 +1814,18 @@ function startRunner() {
   }
   function drawCountdown() {
     const n = Math.ceil(R.count - 0.6), f = (R.count - 0.6) % 1, label = n > 0 ? String(n) : "Los!";
+    if (n > 0) {
+      const r = Math.min(Wd, Ht) * 0.13, cx = Wd / 2, cy = Ht * 0.24;
+      ctx.save(); ctx.shadowColor = "rgba(255,200,61,.9)"; ctx.shadowBlur = r * 0.5;
+      const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r); g.addColorStop(0, "#fff"); g.addColorStop(1, "#ffe9a8");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.strokeStyle = "#f0b316"; ctx.lineWidth = r * 0.12; ctx.stroke();
+      ctx.fillStyle = "#6b3fd6"; ctx.font = `800 ${r * 1.2}px "Baloo Bhaijaan 2", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(T[0], cx, cy + r * 0.1);
+      ctx.font = `800 ${r * 0.32}px "Baloo Bhaijaan 2", sans-serif`; ctx.lineWidth = 6 * dpr; ctx.strokeStyle = "#fff"; ctx.strokeText("Sammle " + T[2] + "!", cx, cy + r * 1.45); ctx.fillStyle = "#1d2a4d"; ctx.fillText("Sammle " + T[2] + "!", cx, cy + r * 1.45);
+      ctx.restore();
+    }
     const sc = 1 + (n > 0 ? f : Math.max(0, R.count) * 1.5) * 0.6;
-    ctx.save(); ctx.globalAlpha = n > 0 ? 1 : Math.max(0, 1 + R.count * 2.2); ctx.translate(Wd / 2, Ht * 0.45); ctx.scale(sc, sc);
+    ctx.save(); ctx.globalAlpha = n > 0 ? 1 : Math.max(0, 1 + R.count * 2.2); ctx.translate(Wd / 2, Ht * 0.56); ctx.scale(sc, sc);
     ctx.font = `800 ${80 * dpr}px "Baloo Bhaijaan 2", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.lineWidth = 12 * dpr; ctx.strokeStyle = "#fff"; ctx.strokeText(label, 0, 0);
     ctx.fillStyle = n > 0 ? "#7b4dff" : "#2fbf68"; ctx.fillText(label, 0, 0);
@@ -1799,11 +1843,11 @@ function startRunner() {
       if (n !== lastCount) { lastCount = n; tone(n > 0 ? [520] : [660, 880, 1320]); }
     } else if (live) {
       if (R.count > -0.5) R.count -= dt;
-      R.time -= dt; R.speed = Math.min(13, 7.5 + (60 - R.time) * 0.09);
+      R.time -= dt; R.speed = Math.min(9, 5.5 + (60 - R.time) * 0.06);
       const step = R.speed * dt; R.dist += step;
       const was = R.y;
       R.x += (R.lane - R.x) * Math.min(1, dt * 14);
-      R.vy -= 18 * dt; R.y = Math.max(0, R.y + R.vy * dt); if (R.y === 0) R.vy = Math.max(0, R.vy);
+      R.vy -= 16 * dt; R.y = Math.max(0, R.y + R.vy * dt); if (R.y === 0) R.vy = Math.max(0, R.vy);
       if (was > 0 && R.y === 0) { R.squash = 1; const [bx, by] = birdPos(); burst(bx, by, ["#f3d3a0", "#e9c08a"], 8, 0.6); }
       R.squash = Math.max(0, R.squash - dt * 5);
       R.inv = Math.max(0, R.inv - dt); R.shake = Math.max(0, R.shake - dt); R.shield = Math.max(0, R.shield - dt);
@@ -1813,7 +1857,7 @@ function startRunner() {
         if (!R.running) return;
         o.d -= step;
         const span = o.kind === "train" ? o.len : 0.25;
-        if (o.d < PD + 0.3 && o.d + span > PD - 0.3 && Math.abs(o.lane - R.x) < 0.45 && !o.done) {
+        if (o.d < PD + 0.3 && o.d + span > PD - 0.3 && Math.abs(o.lane - R.x) < 0.45 && !o.done && (o.kind !== "letter" || Math.abs(R.y - (o.h || 0)) < 0.6)) {
           const [bx, by] = birdPos();
           if (o.kind === "train") { o.done = true; hit(); }
           else if (o.kind === "hurdle") { if (R.y < 0.35) { o.done = true; hit(); } }
@@ -1825,7 +1869,7 @@ function startRunner() {
               tone([780 + Math.min(R.score, 20) * 15, 1170]); burst(bx, by - 50 * dpr, ["#ffd23d", "#ffffff", "#ff5c93"], 12);
               say(R.score % 5 === 0 ? "Super! +1" : "+1", bx, by - 90 * dpr, "#7b4dff");
               if (R.score % 5 === 0) speak(T[1]);
-            } else { tone([330], "triangle"); burst(bx, by - 50 * dpr, ["#cfd6de"], 6, 0.5); say("✗", bx, by - 90 * dpr, "#8a94a6"); }
+            } else { tone([330], "triangle"); burst(bx, by - 50 * dpr, ["#cfd6de"], 6, 0.5); say("✗ " + LETTERS[o.ch][0], bx, by - 90 * dpr, "#8a94a6"); }
           }
         }
       });
@@ -1852,6 +1896,167 @@ function startRunner() {
   game = { raf: 0, stop: () => { R.running = false; cancelAnimationFrame(game && game.raf); cleanup(); } };
   // Zwei Reihen schon unterwegs, mit genug Abstand zum Start
   for (const d0 of [13, 20]) { const n = R.objs.length, m = R.deco.length; spawnRow(); R.objs.slice(n).forEach(o => o.d = d0); R.deco.slice(m).forEach(o => o.d = d0); }
+  game.raf = requestAnimationFrame(frame);
+}
+// Buchstaben-Angeln: ruhiges Hör- und Erkennungsspiel. Erst sieht man den Buchstaben, dann nur noch hören.
+function startFishing() {
+  stopGame();
+  const pool = state.seen.length >= 4 ? shuffle(state.seen) : shuffle([1, 2, 3, 4, 5, 6]);
+  const targets = [pool[0], pool[1 % pool.length], pool[2 % pool.length], pool[3 % pool.length]];
+  const GOAL = 8;
+  const F = { caught: 0, tIdx: 0, inRow: 0, fish: [], fx: [], texts: [], bubbles: [], clock: 0, last: performance.now(), running: true, hook: null };
+  const tgt = () => targets[F.tIdx];
+  const listen = () => F.inRow >= 1;  // nach dem ersten Fang: nur noch hören
+  $("gameBox").innerHTML = `<div class="pond" id="pond"><canvas id="pondCv"></canvas>
+      <div class="hud"><span class="fishes" id="fCount"></span><span id="fGoal"></span><button id="fHear" aria-label="Nochmal hören">🔊</button></div></div>
+    <p class="run-help"><span>🎣 Tippe auf den Fisch mit dem richtigen Buchstaben</span><span>👂 Ab dem zweiten Fisch hörst du den Buchstaben nur noch</span></p>`;
+  const box = $("pond"), cv = $("pondCv"), ctx = cv.getContext("2d");
+  let Wd, Ht, dpr;
+  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); Wd = cv.width = box.clientWidth * dpr; Ht = cv.height = box.clientHeight * dpr; };
+  size(); addEventListener("resize", size);
+  const bird = new Image();
+  try { const s = new XMLSerializer().serializeToString(document.querySelector(".mascot")); bird.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent((s.includes("xmlns=") ? s : s.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"')).replace("<svg", '<svg width="240" height="240"')); } catch (e) {}
+  const COLS = ["#ff8a2b", "#ff5c93", "#ffd23d", "#8b5cf6", "#2fbf68", "#129bdb"];
+  const water = () => Ht * 0.3;
+  function hud() {
+    $("fCount").textContent = "🐟".repeat(F.caught) + "◦".repeat(GOAL - F.caught);
+    $("fGoal").innerHTML = listen() ? "👂 Hör zu!" : `Angle <b lang="ar">${LETTERS[tgt()][0]}</b>`;
+  }
+  function announce() { speak(LETTERS[tgt()][1]); hud(); }
+  $("fHear").onclick = e => { e.stopPropagation(); speak(LETTERS[tgt()][1]); };
+  function addFish(ch) {
+    const dir = Math.random() < 0.5 ? 1 : -1, sz = (0.75 + Math.random() * 0.3);
+    F.fish.push({ ch, x: dir > 0 ? -0.12 : 1.12, y: 0.42 + Math.random() * 0.48, dir, v: 0.05 + Math.random() * 0.05, sz, c: COLS[Math.floor(Math.random() * COLS.length)], ph: Math.random() * 6, st: "swim", t: 0 });
+  }
+  function fillPond() {
+    const want = 6, goodNow = F.fish.filter(f => f.ch === tgt() && f.st === "swim").length;
+    if (goodNow < 2) addFish(tgt());
+    while (F.fish.filter(f => f.st === "swim").length < want) addFish(Math.random() < 0.3 ? tgt() : wrongFor(tgt()));
+  }
+  for (let k = 0; k < 6; k++) { addFish(k < 2 ? tgt() : wrongFor(tgt())); F.fish[k].x = 0.1 + Math.random() * 0.8; }
+  function fishAt(px, py) {
+    const W = Math.min(Wd, Ht);
+    return F.fish.filter(f => f.st === "swim").find(f => Math.hypot(px - f.x * Wd, (py - f.y * Ht) * 1.3) < W * 0.11 * f.sz);
+  }
+  box.onpointerdown = e => {
+    if (e.target.closest("button") || !F.running || F.hook) return;
+    const r = box.getBoundingClientRect(), px = (e.clientX - r.left) * dpr, py = (e.clientY - r.top) * dpr;
+    const f = fishAt(px, py);
+    if (!f) { F.bubbles.push({ x: px, y: py, r: 4 * dpr, v: 40 * dpr }); return; }
+    if (f.ch === tgt()) {
+      f.st = "hooked"; F.hook = { f, t: 0 }; tone([660, 880]);
+    } else {
+      f.st = "flee"; f.dir = f.x * Wd < px ? -1 : 1; f.v = 0.5; oops();
+      F.texts.push({ txt: LETTERS[f.ch][0] + " = " + LETTERS[f.ch][2], x: px, y: py - 30 * dpr, c: "#e5484d", life: 1.4 });
+      speak(LETTERS[f.ch][1]);
+      setTimeout(() => F.running && speak(LETTERS[tgt()][1]), 1100);
+    }
+  };
+  function landed(f) {
+    F.caught++; F.inRow++;
+    const bx = Wd / 2, by = water() - 20 * dpr;
+    for (let k = 0; k < 18; k++) { const a = Math.random() * 6.3, v = (2 + Math.random() * 4) * dpr; F.fx.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3 * dpr, life: 0.9, c: ["#ffd23d", "#ffffff", "#ff5c93", "#2fbf68"][k % 4], s: 4 * dpr }); }
+    F.texts.push({ txt: "Super! " + LETTERS[f.ch][0], x: bx, y: by - 50 * dpr, c: "#7b4dff", life: 1.3 });
+    yay(); speak(LETTERS[f.ch][1]);
+    F.fish = F.fish.filter(x => x !== f);
+    if (F.caught >= GOAL) return setTimeout(finish, 900);
+    if (F.inRow >= 2) { F.tIdx = (F.tIdx + 1) % targets.length; F.inRow = 0; F.fish.forEach(x => { if (x.st === "swim" && x.ch !== tgt() && Math.random() < 0.3) x.ch = wrongFor(tgt()); }); setTimeout(announce, 1300); }
+    hud();
+  }
+  function finish() {
+    if (!F.running) return; F.running = false; cleanup(); confetti(160);
+    gameEnd(`<div class="score">🐟 ${GOAL}</div><p style="margin:0;font-weight:800;font-size:1.3rem">Toll geangelt! Du hast genau hingehört.</p>
+      <p class="note">Heute geangelt: ${[...new Set(targets)].map(i => `<span lang="ar" style="font-size:1.4rem;font-weight:800">${LETTERS[i][0]}</span>`).join(" · ")}</p>`);
+  }
+  function cleanup() { removeEventListener("resize", size); }
+  function drawFish(f) {
+    const W = Math.min(Wd, Ht), s = W * 0.11 * f.sz, x = f.x * Wd, y = f.y * Ht + Math.sin(F.clock * 2 + f.ph) * s * 0.15;
+    ctx.save(); ctx.translate(x, y); ctx.scale(f.dir, 1);
+    if (f.st === "hooked") ctx.rotate(-0.6);
+    const wag = Math.sin(F.clock * 8 + f.ph) * 0.25;
+    ctx.fillStyle = f.c;
+    ctx.beginPath(); ctx.moveTo(-s * 0.8, 0); ctx.lineTo(-s * 1.35, -s * 0.45 + wag * s); ctx.lineTo(-s * 1.35, s * 0.45 + wag * s); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, 0, s, s * 0.68, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.25)"; ctx.beginPath(); ctx.ellipse(s * 0.1, -s * 0.3, s * 0.6, s * 0.2, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = f.c; ctx.globalAlpha = 0.8; ctx.beginPath(); ctx.moveTo(-s * 0.2, -s * 0.62); ctx.quadraticCurveTo(s * 0.1, -s * 1.05, s * 0.35, -s * 0.6); ctx.fill(); ctx.globalAlpha = 1;
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(s * 0.6, -s * 0.15, s * 0.17, 0, 7); ctx.fill();
+    ctx.fillStyle = "#1d2a4d"; ctx.beginPath(); ctx.arc(s * 0.64, -s * 0.15, s * 0.09, 0, 7); ctx.fill();
+    ctx.strokeStyle = "#1d2a4d"; ctx.lineWidth = s * 0.06; ctx.beginPath(); ctx.arc(s * 0.78, s * 0.12, s * 0.1, 0.3, 2); ctx.stroke();
+    ctx.scale(f.dir, 1);
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-s * 0.15 * f.dir, s * 0.05, s * 0.42, 0, 7); ctx.fill();
+    ctx.fillStyle = "#6b3fd6"; ctx.font = `800 ${s * 0.55}px "Baloo Bhaijaan 2", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(LETTERS[f.ch][0], -s * 0.15 * f.dir, s * 0.1);
+    ctx.restore();
+  }
+  function frame(now) {
+    if (!F.running) return;
+    const dt = Math.min(0.05, (now - F.last) / 1000); F.last = now;
+    const live = !anyOverlay() && document.visibilityState === "visible";
+    if (live) {
+      F.clock += dt;
+      F.fish.forEach(f => {
+        if (f.st === "swim" || f.st === "flee") { f.x += f.dir * f.v * dt * (f.st === "flee" ? 1 : 1); if (f.st === "swim" && Math.random() < 0.002) f.dir *= -1; }
+      });
+      F.fish = F.fish.filter(f => f.x > -0.2 && f.x < 1.2 || f.st === "hooked");
+      F.fish.forEach(f => { if (f.st === "swim" && (f.x < -0.15 || f.x > 1.15)) f.dir *= -1; });
+      if (F.hook) {
+        const h = F.hook; h.t += dt;
+        if (h.t > 0.35) { const k = Math.min(1, (h.t - 0.35) / 0.8); h.f.x += (0.5 - h.f.x) * k * 0.2; h.f.y += (0.22 - h.f.y) * k * 0.2; }
+        if (h.t > 1.3) { F.hook = null; landed(h.f); }
+      }
+      fillPond();
+      if (Math.random() < dt * 2) F.bubbles.push({ x: Math.random() * Wd, y: Ht, r: (2 + Math.random() * 4) * dpr, v: (20 + Math.random() * 30) * dpr });
+    }
+    // Himmel und Ufer
+    const wy = water();
+    let g = ctx.createLinearGradient(0, 0, 0, wy); g.addColorStop(0, "#7cc8ff"); g.addColorStop(1, "#d8f1ff");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, Wd, wy);
+    ctx.fillStyle = "#ffd23d"; ctx.beginPath(); ctx.arc(Wd * 0.85, wy * 0.35, Ht * 0.05, 0, 7); ctx.fill();
+    ctx.fillStyle = "#7fd08a"; ctx.beginPath(); ctx.ellipse(Wd * 0.08, wy, Wd * 0.2, wy * 0.25, 0, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(Wd * 0.95, wy, Wd * 0.16, wy * 0.2, 0, Math.PI, 0); ctx.fill();
+    // Wasser
+    g = ctx.createLinearGradient(0, wy, 0, Ht); g.addColorStop(0, "#5fd0f0"); g.addColorStop(0.6, "#2a9fd6"); g.addColorStop(1, "#1a6fb0");
+    ctx.fillStyle = g; ctx.fillRect(0, wy, Wd, Ht - wy);
+    ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 2 * dpr;
+    ctx.beginPath(); for (let x = 0; x <= Wd; x += 8 * dpr) ctx.lineTo(x, wy + Math.sin(x / (30 * dpr) + F.clock * 2) * 3 * dpr); ctx.stroke();
+    // Lichtstrahlen
+    ctx.fillStyle = "rgba(255,255,255,.07)";
+    for (let k = 0; k < 4; k++) { const bx = ((k * 0.3 + F.clock * 0.01) % 1.2) * Wd; ctx.beginPath(); ctx.moveTo(bx, wy); ctx.lineTo(bx + Wd * 0.08, wy); ctx.lineTo(bx - Wd * 0.05, Ht); ctx.lineTo(bx - Wd * 0.18, Ht); ctx.fill(); }
+    // Sand und Seegras
+    ctx.fillStyle = "#f2d39c"; ctx.beginPath(); ctx.moveTo(0, Ht); for (let x = 0; x <= Wd; x += 20 * dpr) ctx.lineTo(x, Ht - 18 * dpr - Math.sin(x / (60 * dpr)) * 8 * dpr); ctx.lineTo(Wd, Ht); ctx.fill();
+    [0.06, 0.2, 0.78, 0.92, 0.5].forEach((p, k) => {
+      ctx.strokeStyle = k % 2 ? "#1f9a4f" : "#35c56c"; ctx.lineWidth = 7 * dpr; ctx.lineCap = "round";
+      ctx.beginPath(); const bx = p * Wd; ctx.moveTo(bx, Ht - 10 * dpr);
+      for (let s = 1; s <= 6; s++) ctx.lineTo(bx + Math.sin(F.clock * 1.5 + s * 0.6 + k) * 8 * dpr * s / 6, Ht - 10 * dpr - s * Ht * 0.04);
+      ctx.stroke();
+    });
+    ctx.fillStyle = "#ff8a9e"; [[0.33, 1], [0.66, 0.8]].forEach(([p, s]) => { for (let q = 0; q < 5; q++) { ctx.beginPath(); ctx.arc(p * Wd + (q - 2) * 6 * dpr * s, Ht - 22 * dpr - Math.abs(q - 2) * -3 * dpr, 5 * dpr * s, 0, 7); ctx.fill(); } });
+    // Blasen
+    ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 1.5 * dpr;
+    F.bubbles.forEach(b => { b.y -= b.v * dt; ctx.beginPath(); ctx.arc(b.x + Math.sin(b.y / 20) * 3, b.y, b.r, 0, 7); ctx.stroke(); });
+    F.bubbles = F.bubbles.filter(b => b.y > wy);
+    // Boot mit Hudhud und Angel
+    const bx = Wd / 2, by = wy + Math.sin(F.clock * 1.6) * 3 * dpr, bw = Math.min(Wd * 0.34, Ht * 0.34), bs = bw * 0.62;
+    if (bird.complete && bird.naturalWidth) ctx.drawImage(bird, bx - bs * 0.55, by - bs * 0.95, bs, bs);
+    ctx.fillStyle = "#c0743a"; ctx.beginPath(); ctx.moveTo(bx - bw / 2, by - bw * 0.08); ctx.lineTo(bx + bw / 2, by - bw * 0.08); ctx.quadraticCurveTo(bx + bw * 0.4, by + bw * 0.16, bx, by + bw * 0.16); ctx.quadraticCurveTo(bx - bw * 0.4, by + bw * 0.16, bx - bw / 2, by - bw * 0.08); ctx.fill();
+    ctx.fillStyle = "#e59a5c"; ctx.fillRect(bx - bw / 2, by - bw * 0.1, bw, bw * 0.05);
+    const tipX = bx + bw * 0.55, tipY = by - bw * 0.62;
+    ctx.strokeStyle = "#5b3a1e"; ctx.lineWidth = 4 * dpr; ctx.beginPath(); ctx.moveTo(bx + bw * 0.05, by - bw * 0.15); ctx.lineTo(tipX, tipY); ctx.stroke();
+    let hx = tipX + Math.sin(F.clock) * 6 * dpr, hy = wy + Ht * 0.12;
+    if (F.hook) { const f = F.hook.f, k = Math.min(1, F.hook.t / 0.35); hx = tipX + (f.x * Wd - tipX) * k; hy = tipY + (f.y * Ht - tipY) * k; }
+    ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.moveTo(tipX, tipY); ctx.lineTo(hx, hy); ctx.stroke();
+    ctx.fillStyle = "#e5484d"; ctx.beginPath(); ctx.arc(hx, hy, 5 * dpr, 0, 7); ctx.fill();
+    F.fish.forEach(drawFish);
+    // Funken und Texte
+    F.fx.forEach(p => { p.vy += 0.25 * dpr; p.x += p.vx; p.y += p.vy; p.life -= dt; ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, 7); ctx.fill(); });
+    F.fx = F.fx.filter(p => p.life > 0);
+    F.texts.forEach(t => { t.life -= dt * 0.8; t.y -= 40 * dpr * dt; ctx.globalAlpha = Math.max(0, Math.min(1, t.life * 2));
+      ctx.font = `800 ${24 * dpr}px "Baloo Bhaijaan 2", sans-serif`; ctx.textAlign = "center"; ctx.lineWidth = 6 * dpr; ctx.strokeStyle = "#fff"; ctx.strokeText(t.txt, t.x, t.y); ctx.fillStyle = t.c; ctx.fillText(t.txt, t.x, t.y); });
+    ctx.globalAlpha = 1; F.texts = F.texts.filter(t => t.life > 0);
+    game.raf = requestAnimationFrame(frame);
+  }
+  game = { raf: 0, stop: () => { F.running = false; cancelAnimationFrame(game && game.raf); cleanup(); } };
+  hud(); announce();
   game.raf = requestAnimationFrame(frame);
 }
 function buySticker() {
