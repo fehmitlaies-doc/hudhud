@@ -294,7 +294,8 @@ button, a, input { touch-action: manipulation }
 .runner .coin-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 1.2rem }
 .runner .coin-pill b { display: inline-grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #ffe9a8); border: 3px solid #f0b316; color: #6b3fd6; font-size: 1.1rem; line-height: 1 }
 .runner .mute { pointer-events: auto; border: 0; font-size: 1.2rem; min-width: 44px; min-height: 36px }
-.runner .goal { top: 60px }
+.runner .goal { top: 60px; transition: opacity .3s }
+.runner.intro .goal, .runner.intro .hud { opacity: 0 }
 .run-end .big-coin { width: 6.5rem; height: 6.5rem; border-radius: 50%; display: grid; place-items: center; font-size: 3.6rem; font-weight: 800; color: #6b3fd6; background: radial-gradient(circle at 35% 30%, #fff, #ffe9a8); border: 6px solid #f0b316; box-shadow: 0 0 30px rgba(255,200,61,.7) }
 @media (prefers-reduced-motion: no-preference) { .run-end .big-coin { animation: pop .7s ease 2 } }
 .pond { position: relative; width: 100%; height: min(64vh, 520px); border-radius: 24px; overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none; background: #4cc2e8 }
@@ -315,7 +316,19 @@ button, a, input { touch-action: manipulation }
 .sheet h2 { margin: 0; font-size: 1.5rem; line-height: 1.2 }
 .sheet p { margin: 0 }
 .sleep { text-align: center; justify-items: center }
-.sleep svg { width: 140px; height: 140px }
+.sleep > svg { width: 140px; height: 140px }
+.mom-stop { position: relative; width: 250px; height: 270px; margin: 0 auto }
+.mom-stop img { position: absolute; left: 20px; top: 50px; width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 6px solid var(--sun); box-shadow: 0 6px 0 rgba(29,42,77,.15) }
+.mom-bubble { position: absolute; left: 50%; top: 0; transform: translateX(-50%) rotate(-4deg); z-index: 2; margin: 0; background: var(--card); border: 4px solid var(--rose); border-radius: 22px; padding: 0 16px; font-size: 2rem; font-weight: 800; color: var(--rose); white-space: nowrap; line-height: 1.5; direction: rtl }
+.mom-bubble::after { content: ""; position: absolute; left: 40%; bottom: -14px; border: 10px solid transparent; border-top-color: var(--rose); border-bottom: 0 }
+.stop-sign { position: absolute; right: -10px; bottom: -6px; width: 105px; height: 130px; transform: rotate(14deg); transform-origin: 50% 100%; z-index: 2; filter: drop-shadow(0 4px 0 rgba(29,42,77,.2)) }
+@media (prefers-reduced-motion: no-preference) {
+  .mom-stop .stop-sign { animation: shake-stop .9s ease-in-out infinite }
+  @keyframes shake-stop { 50% { transform: rotate(-4deg) } }
+  .mom-bubble { animation: pop .6s ease 3 }
+}
+.photo-edit { display: flex; flex-wrap: wrap; gap: 12px; align-items: center }
+.photo-edit canvas { width: 160px; height: 160px; border-radius: 50%; border: 4px solid var(--sun); touch-action: none; background: var(--sky); cursor: grab }
 .sheet input { font: inherit; font-size: 1.4rem; width: 8ch; padding: 6px 10px; border: 3px solid var(--line); border-radius: 14px }
 .sheet h3 { margin: 6px 0 0; font-size: 1.1rem }
 .sheet ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: .95rem }
@@ -557,7 +570,18 @@ body.no-scroll { overflow: hidden }
 
 <div class="overlay" id="sleepOverlay" hidden>
   <div class="sheet sleep">
-    <svg viewBox="0 0 120 120" aria-hidden="true">  <g transform="translate(56 40)">
+    <div class="mom-stop" id="momStop" hidden>
+      <p class="mom-bubble" id="momText" lang="ar"></p>
+      <img id="momImg" alt="Mama sagt Stopp">
+      <svg class="stop-sign" viewBox="0 0 120 150" aria-hidden="true">
+        <rect x="55" y="96" width="10" height="54" rx="4" fill="#8a94a6"/>
+        <polygon points="35,4 85,4 116,35 116,85 85,116 35,116 4,85 4,35" fill="#fff"/>
+        <polygon points="38,11 82,11 109,38 109,82 82,109 38,109 11,82 11,38" fill="#e5484d"/>
+        <text x="60" y="58" text-anchor="middle" font-family="Baloo Bhaijaan 2, sans-serif" font-weight="800" font-size="30" fill="#fff">STOP</text>
+        <text x="60" y="92" text-anchor="middle" font-family="Baloo Bhaijaan 2, sans-serif" font-weight="800" font-size="28" fill="#fff">يِزِّي</text>
+      </svg>
+    </div>
+    <svg id="sleepBird" viewBox="0 0 120 120" aria-hidden="true">  <g transform="translate(56 40)">
     <g fill="#ff9d3a" stroke="#7a3b10" stroke-width="1.2">
       <path d="M0 0 C-6 -10 -16 -20 -26 -22 C-24 -14 -14 -4 0 0Z"/>
       <path d="M0 0 C-4 -12 -8 -26 -14 -32 C-18 -24 -10 -8 0 0Z"/>
@@ -584,9 +608,9 @@ body.no-scroll { overflow: hidden }
   <path d="M58 101 L56 112 M70 101 L72 112" stroke="#3b2a20" stroke-width="3" stroke-linecap="round"/>
   <path d="M51 112 L60 112 M67 112 L77 112" stroke="#3b2a20" stroke-width="3" stroke-linecap="round"/>
 </svg>
-    <h2>Hudhud ist müde 😴</h2>
-    <p>Für heute ist Schluss. Du hast toll gelernt! Morgen geht es weiter. Jetzt kannst du draußen spielen, malen oder mit Mama und Papa lesen.</p>
-    <button class="soft" id="sleepParent">🔒 Eltern</button>
+    <h2 id="sleepTitle">Hudhud ist müde 😴</h2>
+    <p id="sleepMsg">Für heute ist Schluss. Du hast toll gelernt! Morgen geht es weiter. Jetzt kannst du draußen spielen, malen oder mit Mama und Papa lesen.</p>
+    <div class="row" style="justify-content:center"><button class="soft" id="sleepParent">🔒 Eltern</button><button class="soft" id="sleepPreviewClose" hidden>Fermer l'aperçu</button></div>
   </div>
 </div>
 
@@ -1558,7 +1582,7 @@ function startRunner() {
       <div class="timebar"><i id="rBar"></i></div>
       <div class="hud"><span id="rHearts">❤️❤️❤️</span><span class="coin-pill"><b lang="ar">${T[0]}</b><span id="rScore">0</span></span><button class="mute" id="rMute" aria-label="Musik an oder aus">${state.music ? "🎵" : "🔇"}</button></div>
       <div class="goal">Sammle <b lang="ar">${T[0]}</b> ${T[2]}</div></div>
-    <p class="run-help"><span>👈 👉 Wischen oder links/rechts tippen: Gleis wechseln</span><span>👆 Nach oben wischen oder Mitte tippen: springen</span><span>⭐ Stern = Schutzschild</span><span>🪙 Über Hürden springen: Münzen in der Luft!</span></p>
+    <p class="run-help"><span>👈 👉 Wischen oder links/rechts tippen: Gleis wechseln</span><span>👆 Nach oben wischen oder Mitte tippen: springen</span><span>⭐ Stern = Schutzschild</span><span>🪙 Über Hürden springen: Münzen in der Luft!</span><span>🟧 Über die orange Rampe aufs Zugdach laufen</span><span>🦅 Lass dich nicht vom Adler erwischen!</span></p>
     <div class="row"><button class="say" id="rSay">${SPEAK} ${T[2]} anhören</button></div>`;
   $("rSay").onclick = () => speak(T[1]); speak(T[1]);
   const box = $("run"), cv = $("runCv"), ctx = cv.getContext("2d");
@@ -1570,9 +1594,9 @@ function startRunner() {
   const others = [...LETTERS.keys()].filter(i => i !== target);
   const TRAINS = [["#1f7fe0", "#ffd23d"], ["#e5484d", "#ffffff"], ["#2fbf68", "#ffd23d"], ["#8b5cf6", "#ff8a2b"], ["#ff8a2b", "#ffffff"]];
   const R = { lane: 0, x: 0, y: 0, vy: 0, hearts: 3, score: 0, time: 60, speed: 5.5, dist: 0, next: 4, inv: 0, shield: 0, squash: 0, dustT: 0,
-    count: 3.6, gulls: Array.from({ length: 3 }, () => ({ x: Math.random(), y: 0.1 + Math.random() * 0.12, v: 0.03 + Math.random() * 0.03, ph: Math.random() * 6 })), objs: [], deco: [], fx: [], texts: [], running: true, last: performance.now(), shake: 0, clock: 0,
+    intro: 4.6, chase: 1, ground: 0, count: 3.6, gulls: Array.from({ length: 3 }, () => ({ x: Math.random(), y: 0.1 + Math.random() * 0.12, v: 0.03 + Math.random() * 0.03, ph: Math.random() * 6 })), objs: [], deco: [], fx: [], texts: [], running: true, last: performance.now(), shake: 0, clock: 0,
     clouds: Array.from({ length: 5 }, (_, i) => ({ x: Math.random(), y: 0.08 + Math.random() * 0.17, s: 0.6 + Math.random() * 0.7, v: 0.004 + Math.random() * 0.006 })) };
-  const PD = 0.8, FAR = 24;
+  const PD = 0.8, FAR = 24, ROOF = 1.82;
   const proj = d => 1 / (1 + Math.max(-0.6, d) * 0.3);
   const horizon = () => Ht * 0.34;
   const LW = () => Wd * 0.3;
@@ -1603,7 +1627,15 @@ function startRunner() {
   function spawnRow() {
     const d = FAR, r = Math.random(), lanes = shuffle([-1, 0, 1]);
     const letter = (lane, dd = d, h = 0, pGood = 0.55) => R.objs.push({ kind: "letter", lane, d: dd, h, ch: Math.random() < pGood ? target : wrongFor(target), ph: Math.random() * 6 });
-    if (r < 0.3) { R.objs.push({ kind: "train", lane: lanes[0], d, len: 2.4, c: TRAINS[Math.floor(Math.random() * TRAINS.length)] }); letter(lanes[1]); if (Math.random() < 0.5) letter(lanes[2]); }
+    if (r < 0.34) {
+      const tr = { kind: "train", lane: lanes[0], d, len: 2.4, c: TRAINS[Math.floor(Math.random() * TRAINS.length)] };
+      // Wie bei Subway Surfers: manche Züge haben eine Rampe, über die man aufs Dach läuft
+      if (Math.random() < 0.6) {
+        tr.len = 3.6; R.objs.push({ kind: "ramp", lane: lanes[0], d, len: 1.8 });
+        [0.7, 1.6, 2.5].forEach(k => letter(lanes[0], d + k, ROOF + 0.1, 0.75));
+      }
+      R.objs.push(tr); letter(lanes[1]); if (Math.random() < 0.5) letter(lanes[2]);
+    }
     else if (r < 0.55) {
       R.objs.push({ kind: "hurdle", lane: lanes[0], d });
       // Bogen aus Münzen über der Hürde: wer springt, sammelt sie ein
@@ -1615,11 +1647,13 @@ function startRunner() {
     for (let k = 0; k < 2; k++) if (Math.random() < 0.8) R.deco.push({ side: k ? 1 : -1, d: d + Math.random() * 3, kind: ["palm", "palm", "house", "cactus", "flower"][Math.floor(Math.random() * 5)] });
   }
   function move(dir) { const n = Math.max(-1, Math.min(1, R.lane + dir)); if (n !== R.lane) { R.lane = n; tone([520]); } }
-  function jump() { if (R.y <= 0.01 && R.count <= 0) { R.vy = 6.0; tone([620, 820]); } }
+  function jump() { if (R.y <= R.ground + 0.01 && R.count <= 0 && R.intro <= 0) { R.vy = 6.0; tone([620, 820]); } }
   let sx0 = 0, sy0 = 0;
   box.onpointerdown = e => { if (e.target.closest(".mute")) return; e.preventDefault(); sx0 = e.clientX; sy0 = e.clientY; };
   box.onpointerup = e => {
-    if (e.target.closest(".mute") || R.count > 0) return;
+    if (e.target.closest(".mute")) return;
+    if (R.intro > 0) { R.intro = 0; return; }
+    if (R.count > 0) return;
     const dx = e.clientX - sx0, dy = e.clientY - sy0, r = box.getBoundingClientRect();
     if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 1 : -1);
     else if (dy < -30) jump();
@@ -1638,9 +1672,10 @@ function startRunner() {
   }
   function say(txt, x, y, c) { R.texts.push({ txt, x, y, c, life: 1 }); }
   function birdPos() { return [sx(R.x, PD), sy(PD) - R.y * LW() * proj(PD) * 0.55]; }
+  const upPx = (h, d) => h * LW() * proj(d) * 0.55;
   function hit() {
     if (R.inv > 0 || R.shield > 0) return;
-    R.hearts--; R.inv = 1.6; R.shake = 0.35; oops();
+    R.hearts--; R.inv = 1.6; R.shake = 0.35; R.chase = 1; oops();
     const [bx, by] = birdPos(); burst(bx, by - 40 * dpr, ["#ffffff", "#cfd6de"], 14); say("Autsch!", bx, by - 90 * dpr, "#e5484d");
     $("rHearts").textContent = "❤️".repeat(Math.max(0, R.hearts)) + "🤍".repeat(3 - Math.max(0, R.hearts));
     bump($("rHearts"), "wiggle");
@@ -1652,7 +1687,8 @@ function startRunner() {
     const prev = state.runBest || 0, rec = R.score > prev && R.score > 0;
     state.runBest = Math.max(prev, R.score); save();
     if (R.score > 0) { confetti(160); yay(); }
-    const msg = R.score >= 15 ? "Wahnsinn! Du bist ein Profi! 🏆" : R.score >= 8 ? "Super gelaufen! 🌟" : R.score > 0 ? "Gut gemacht! 🎉" : "Beim nächsten Mal klappt es! 💪";
+    const caught = R.hearts <= 0;
+    const msg = caught ? "Der Adler hat dich erwischt! 🦅 Er wollte nur seinen Bonbon zurück." : R.score >= 15 ? "Wahnsinn! Du bist dem Adler entkommen! 🍬🏆" : R.score >= 8 ? "Super gelaufen! Der Adler ist zu langsam! 🍬" : "Geschafft! Der Bonbon gehört dir! 🍬";
     $("gameBox").innerHTML = `<div class="result run-end">
         <div class="big-coin" lang="ar">${T[0]}</div>
         <div class="score">${R.score} ×</div>
@@ -1836,11 +1872,107 @@ function startRunner() {
     ctx.shadowBlur = 0; ctx.strokeStyle = "#e0a000"; ctx.lineWidth = r * 0.1; ctx.stroke();
     ctx.restore();
   }
+  function drawCandy(x, y, r, rot = 0) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+    ctx.fillStyle = "#ff8fb8";
+    ctx.beginPath(); ctx.moveTo(-r * 0.8, 0); ctx.lineTo(-r * 1.6, -r * 0.6); ctx.lineTo(-r * 1.6, r * 0.6); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(r * 0.8, 0); ctx.lineTo(r * 1.6, -r * 0.6); ctx.lineTo(r * 1.6, r * 0.6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#ff3d7f"; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = r * 0.25; ctx.beginPath(); ctx.arc(0, 0, r * 0.55, 0.3, 4.5); ctx.stroke();
+    ctx.restore();
+  }
+  // Adler: braun mit weißem Kopf, schaut nach links
+  function drawEagle(x, y, s, flap, awake) {
+    ctx.save(); ctx.translate(x, y);
+    const a = Math.sin(flap) * 0.6;
+    ctx.fillStyle = "#6b3f1f";
+    ctx.save(); ctx.rotate(-0.4 - a); ctx.beginPath(); ctx.ellipse(s * 0.15, -s * 0.35, s * 0.18, s * 0.6, 0.6, 0, 7); ctx.fill(); ctx.restore();
+    ctx.fillStyle = "#8b5a2b"; ctx.beginPath(); ctx.ellipse(0, 0, s * 0.48, s * 0.36, -0.15, 0, 7); ctx.fill();
+    ctx.fillStyle = "#c58f5a"; ctx.beginPath(); ctx.ellipse(-s * 0.08, s * 0.1, s * 0.28, s * 0.2, -0.15, 0, 7); ctx.fill();
+    ctx.fillStyle = "#5a3418"; ctx.beginPath(); ctx.moveTo(s * 0.4, -s * 0.05); ctx.lineTo(s * 0.8, -s * 0.2); ctx.lineTo(s * 0.75, s * 0.12); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#7a4a26"; ctx.save(); ctx.rotate(0.3 + a); ctx.beginPath(); ctx.ellipse(s * 0.05, -s * 0.3, s * 0.2, s * 0.62, -0.5, 0, 7); ctx.fill(); ctx.restore();
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(-s * 0.38, -s * 0.32, s * 0.25, 0, 7); ctx.fill();
+    ctx.fillStyle = "#ffc83d"; ctx.beginPath(); ctx.moveTo(-s * 0.55, -s * 0.38); ctx.quadraticCurveTo(-s * 0.85, -s * 0.36, -s * 0.78, -s * 0.18); ctx.lineTo(-s * 0.55, -s * 0.24); ctx.closePath(); ctx.fill();
+    if (awake) {
+      ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-s * 0.42, -s * 0.38, s * 0.08, 0, 7); ctx.fill();
+      ctx.fillStyle = "#1d2a4d"; ctx.beginPath(); ctx.arc(-s * 0.45, -s * 0.38, s * 0.045, 0, 7); ctx.fill();
+      ctx.strokeStyle = "#1d2a4d"; ctx.lineWidth = s * 0.04; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(-s * 0.55, -s * 0.5); ctx.lineTo(-s * 0.32, -s * 0.44); ctx.stroke();
+    } else {
+      ctx.strokeStyle = "#1d2a4d"; ctx.lineWidth = s * 0.035; ctx.lineCap = "round"; ctx.beginPath(); ctx.arc(-s * 0.43, -s * 0.38, s * 0.06, 0.2, Math.PI - 0.2); ctx.stroke();
+    }
+    ctx.strokeStyle = "#ffc83d"; ctx.lineWidth = s * 0.05; ctx.beginPath(); ctx.moveTo(-s * 0.1, s * 0.33); ctx.lineTo(-s * 0.14, s * 0.48); ctx.moveTo(s * 0.1, s * 0.33); ctx.lineTo(s * 0.08, s * 0.48); ctx.stroke();
+    ctx.restore();
+  }
+  function bubble(txt, x, y, size) {
+    ctx.font = `800 ${size}px "Baloo Bhaijaan 2", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const w = ctx.measureText(txt).width + size * 1.2, h = size * 1.7;
+    ctx.fillStyle = "#fff"; rr(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x - size * 0.3, y + h / 2 - 2); ctx.lineTo(x, y + h / 2 + size * 0.6); ctx.lineTo(x + size * 0.3, y + h / 2 - 2); ctx.fill();
+    ctx.fillStyle = "#1d2a4d"; ctx.fillText(txt, x, y + size * 0.05);
+  }
+  // Kleine Geschichte am Anfang: Hudhud holt den Bonbon aus dem Adlernest, der Adler wacht auf
+  function drawIntro() {
+    const t = 4.6 - R.intro, U = Math.min(Wd, Ht);
+    let g = ctx.createLinearGradient(0, 0, 0, Ht); g.addColorStop(0, "#47a8ff"); g.addColorStop(0.6, "#bfe9ff"); g.addColorStop(1, "#ffe2b0");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, Wd, Ht);
+    R.clouds.forEach(c => cloud(c.x * Wd, c.y * Ht, c.s * Ht * 0.035));
+    ctx.fillStyle = "#f1cf9b"; ctx.fillRect(0, Ht * 0.82, Wd, Ht * 0.18);
+    // Felsen mit Nest
+    const nx = Wd * 0.68, ny = Ht * 0.46;
+    ctx.fillStyle = "#b07a4f"; ctx.beginPath(); ctx.moveTo(nx - U * 0.22, Ht * 0.83); ctx.lineTo(nx - U * 0.12, ny + U * 0.05); ctx.lineTo(nx + U * 0.14, ny + U * 0.04); ctx.lineTo(nx + U * 0.25, Ht * 0.83); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#c98f5f"; ctx.beginPath(); ctx.moveTo(nx - U * 0.1, ny + U * 0.06); ctx.lineTo(nx + U * 0.02, ny + U * 0.05); ctx.lineTo(nx - U * 0.04, Ht * 0.83); ctx.lineTo(nx - U * 0.16, Ht * 0.83); ctx.closePath(); ctx.fill();
+    const flying = t > 2.7, ex = flying ? nx + U * 0.08 - (t - 2.7) * Wd * 0.25 : nx + U * 0.08, ey = flying ? ny - U * 0.12 - Math.sin((t - 2.7) * 3) * U * 0.03 : ny - U * 0.06;
+    const awake = t > 1.9;
+    drawEagle(ex + (awake && !flying ? Math.sin(t * 40) * U * 0.006 : 0), ey, U * 0.2, flying ? t * 14 : 0, awake);
+    ctx.strokeStyle = "#7a4a26"; ctx.lineWidth = U * 0.012;
+    for (let k = 0; k < 9; k++) { ctx.beginPath(); ctx.moveTo(nx - U * 0.15 + k * U * 0.035, ny - U * 0.01 + (k % 2) * U * 0.02); ctx.lineTo(nx - U * 0.13 + k * U * 0.03, ny + U * 0.05 - (k % 3) * U * 0.01); ctx.stroke(); }
+    ctx.fillStyle = "#8b5a2b"; ctx.beginPath(); ctx.ellipse(nx, ny + U * 0.02, U * 0.17, U * 0.05, 0, 0, 7); ctx.fill();
+    // Hudhud fliegt herein, nimmt den Bonbon, flieht
+    let bx, by;
+    if (t < 1.3) { bx = -U * 0.1 + (nx - U * 0.1 + U * 0.1) * (t / 1.3); by = Ht * 0.3 + Math.sin(t * 6) * U * 0.02; }
+    else if (t < 2.7) { bx = nx - U * 0.1; by = ny - U * 0.1 + Math.sin(t * 10) * U * 0.01; }
+    else { const k = (t - 2.7) / 1.9; bx = nx - U * 0.1 - k * Wd * 0.9; by = ny - U * 0.1 + k * Ht * 0.25; }
+    const hasCandy = t > 1.3;
+    if (!hasCandy) { ctx.save(); ctx.shadowColor = "rgba(255,92,147,.9)"; ctx.shadowBlur = U * 0.04; drawCandy(nx + U * 0.06, ny - U * 0.015, U * 0.03, Math.sin(t * 3) * 0.3); ctx.restore(); }
+    const bs = U * 0.2;
+    if (bird.complete && bird.naturalWidth) ctx.drawImage(bird, bx - bs / 2, by - bs / 2, bs, bs);
+    if (hasCandy) drawCandy(bx - bs * 0.48, by + bs * 0.05, U * 0.022, 0.4);
+    // Sprechblasen
+    if (t < 1.6) bubble("Zzz…", nx + U * 0.12, ny - U * 0.2, U * 0.05);
+    else if (t < 2.2) bubble("Hehe! 🍬", bx, by - bs * 0.75, U * 0.05);
+    if (t > 1.9 && t < 3.3) bubble("Mein Bonbon!! 😠", ex, ey - U * 0.24, U * 0.055);
+    if (t > 3.2) bubble("Lauf, Hudhud!", Wd / 2, Ht * 0.16, U * 0.065);
+    ctx.font = `600 ${U * 0.035}px "Baloo Bhaijaan 2", sans-serif`; ctx.textAlign = "center"; ctx.fillStyle = "rgba(29,42,77,.6)";
+    ctx.fillText("Tippen zum Überspringen", Wd / 2, Ht * 0.94);
+  }
+  // Der Adler verfolgt Hudhud; nach einem Zusammenstoß kommt er ganz nah
+  function drawChaser() {
+    if (R.chase <= 0.02) return;
+    const s = LW() * 0.7, x = sx(R.x * 0.85, PD) + s * 0.75 + Math.sin(R.clock * 2) * s * 0.08;
+    const y = Ht + s * 0.35 - R.chase * s * 0.5;
+    drawEagle(x, y, s, R.clock * 12, true);
+    if (R.chase > 0.8 && R.inv > 0) bubble("Gib her! 😠", x, y - s * 0.75, 18 * dpr);
+  }
+  function drawRamp(o) {
+    const far = o.d, near = Math.max(-0.5, o.d - o.len);
+    if (far < -0.5) return;
+    const l = o.lane, w = 0.42, hf = upPx(ROOF, far), hn = upPx(ROOF * Math.max(0, (near - (o.d - o.len)) / o.len), near);
+    const p = (lane, d, h) => [sx(lane, d), sy(d) - h];
+    const side = l < 0 ? 1 : l > 0 ? -1 : 0;
+    if (side) poly([p(l + side * w, near, 0), p(l + side * w, far, 0), p(l + side * w, far, hf), p(l + side * w, near, hn)], "#c96f1e");
+    poly([p(l - w, near, hn), p(l + w, near, hn), p(l + w, far, hf), p(l - w, far, hf)], "#ffb02e");
+    ctx.strokeStyle = "#ff7a1a"; ctx.lineWidth = 3 * dpr;
+    for (let k = 1; k < 5; k++) {
+      const f = k / 5, d = near + (far - near) * f, h = upPx(ROOF * Math.max(0, (d - (o.d - o.len)) / o.len), d);
+      ctx.beginPath(); ctx.moveTo(...p(l - w, d, h)); ctx.lineTo(...p(l + w, d, h)); ctx.stroke();
+    }
+    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2 * dpr; ctx.beginPath(); ctx.moveTo(...p(l - w, near, hn)); ctx.lineTo(...p(l - w, far, hf)); ctx.moveTo(...p(l + w, near, hn)); ctx.lineTo(...p(l + w, far, hf)); ctx.stroke();
+  }
   function drawBird() {
-    const s = LW() * proj(PD) * 1.0, [x, yb] = birdPos(), ground = sy(PD);
-    ctx.fillStyle = "rgba(0,0,0,.2)"; ctx.beginPath(); ctx.ellipse(x, ground - s * 0.02, s * 0.3 / (1 + R.y * 0.4), s * 0.07 / (1 + R.y * 0.4), 0, 0, 7); ctx.fill();
+    const s = LW() * proj(PD) * 1.0, [x, yb] = birdPos(), ground = sy(PD) - upPx(R.ground, PD);
+    ctx.fillStyle = "rgba(0,0,0,.2)"; ctx.beginPath(); ctx.ellipse(x, ground - s * 0.02, s * 0.3 / (1 + (R.y - R.ground) * 0.4), s * 0.07 / (1 + (R.y - R.ground) * 0.4), 0, 0, 7); ctx.fill();
     if (R.inv > 0 && Math.floor(R.inv * 10) % 2) return;
-    const bob = R.y > 0 ? 0 : Math.abs(Math.sin(R.dist * 4.5)) * s * 0.05;
+    const bob = R.y > R.ground + 0.01 ? 0 : Math.abs(Math.sin(R.dist * 4.5)) * s * 0.05;
     const sqx = 1 + R.squash * 0.25, sqy = 1 - R.squash * 0.2 + (R.vy > 0 ? 0.08 : 0);
     ctx.save(); ctx.translate(x, yb - bob); ctx.rotate((R.lane - R.x) * 0.35); ctx.scale(sqx, sqy);
     if (R.shield > 0) {
@@ -1850,6 +1982,7 @@ function startRunner() {
     }
     if (bird.complete && bird.naturalWidth) ctx.drawImage(bird, -s / 2, -s, s, s);
     else { ctx.fillStyle = "#f6a65b"; ctx.beginPath(); ctx.arc(0, -s * 0.4, s * 0.3, 0, 7); ctx.fill(); }
+    drawCandy(-s * 0.5, -s * 0.4, s * 0.06, 0.4);
     ctx.restore();
   }
   function drawFx(dt) {
@@ -1887,7 +2020,10 @@ function startRunner() {
     const dt = Math.min(0.05, (now - R.last) / 1000); R.last = now;
     const live = !anyOverlay() && document.visibilityState === "visible";
     if (live) R.clock += dt;
-    if (live && R.count > 0) {
+    if (live && R.intro > 0) {
+      R.intro -= dt;
+      if (R.intro <= 0) speak(T[1]);
+    } else if (live && R.count > 0) {
       R.count -= dt;
       const n = Math.ceil(R.count - 0.6);
       if (n !== lastCount) { lastCount = n; tone(n > 0 ? [520] : [660, 880, 1320]); }
@@ -1895,22 +2031,33 @@ function startRunner() {
       if (R.count > -0.5) R.count -= dt;
       R.time -= dt; R.speed = Math.min(9, 5.5 + (60 - R.time) * 0.06);
       const step = R.speed * dt; R.dist += step;
-      const was = R.y;
+      const was = R.y, wasGround = R.ground;
       R.x += (R.lane - R.x) * Math.min(1, dt * 14);
-      R.vy -= 16 * dt; R.y = Math.max(0, R.y + R.vy * dt); if (R.y === 0) R.vy = Math.max(0, R.vy);
-      if (was > 0 && R.y === 0) { R.squash = 1; const [bx, by] = birdPos(); burst(bx, by, ["#f3d3a0", "#e9c08a"], 8, 0.6); }
+      let ground = 0;
+      R.objs.forEach(o => {
+        if (Math.abs(o.lane - R.x) >= 0.45) return;
+        if (o.kind === "ramp") { const rs = o.d - o.len; if (PD >= rs && PD <= o.d) ground = Math.max(ground, ROOF * (PD - rs) / o.len); }
+        if (o.kind === "train" && PD >= o.d - 0.05 && PD <= o.d + o.len && R.y >= ROOF - 0.4) ground = Math.max(ground, ROOF);
+      });
+      R.ground = ground;
+      R.vy -= 16 * dt; R.y += R.vy * dt;
+      if (R.y <= ground) { R.y = ground; R.vy = Math.max(0, R.vy); }
+      if (was > wasGround + 0.05 && R.y <= ground + 0.001) { R.squash = 1; const [bx, by] = birdPos(); burst(bx, by, ["#f3d3a0", "#e9c08a"], 8, 0.6); }
+      if (ground >= ROOF && wasGround < ROOF) say("Aufs Dach! 🚂", ...birdPos().map((v, i) => i ? v - 90 * dpr : v), "#ff8a2b");
+      R.chase = Math.max(0, R.chase - dt * 0.28);
       R.squash = Math.max(0, R.squash - dt * 5);
       R.inv = Math.max(0, R.inv - dt); R.shake = Math.max(0, R.shake - dt); R.shield = Math.max(0, R.shield - dt);
-      R.dustT -= dt; if (R.dustT <= 0 && R.y === 0) { R.dustT = 0.12; const [bx, by] = birdPos(); R.fx.push({ x: bx + (Math.random() - 0.5) * 20 * dpr, y: by, vx: (Math.random() - 0.5) * 2 * dpr, vy: 1.5 * dpr, life: 0.4, c: "rgba(233,192,138,.8)", s: 4 * dpr }); }
+      R.dustT -= dt; if (R.dustT <= 0 && R.y <= R.ground + 0.01) { R.dustT = 0.12; const [bx, by] = birdPos(); R.fx.push({ x: bx + (Math.random() - 0.5) * 20 * dpr, y: by, vx: (Math.random() - 0.5) * 2 * dpr, vy: 1.5 * dpr, life: 0.4, c: "rgba(233,192,138,.8)", s: 4 * dpr }); }
       R.next -= step; if (R.next <= 0) { spawnRow(); R.next = 6.5 + Math.random() * 3 - Math.min(2, (60 - R.time) * 0.03); }
       R.objs.forEach(o => {
         if (!R.running) return;
         o.d -= step;
+        if (o.kind === "ramp") return;
         const span = o.kind === "train" ? o.len : 0.25;
         if (o.d < PD + 0.3 && o.d + span > PD - 0.3 && Math.abs(o.lane - R.x) < 0.45 && !o.done && (o.kind !== "letter" || Math.abs(R.y - (o.h || 0)) < 0.6)) {
           const [bx, by] = birdPos();
-          if (o.kind === "train") { o.done = true; hit(); }
-          else if (o.kind === "hurdle") { if (R.y < 0.35) { o.done = true; hit(); } }
+          if (o.kind === "train") { if (R.y < ROOF - 0.4) { o.done = true; hit(); } }
+          else if (o.kind === "hurdle") { if (R.y < 0.35 && R.ground < 0.1) { o.done = true; hit(); } }
           else if (o.kind === "star") { o.done = o.taken = true; R.shield = 6; yay(); burst(bx, by - 40 * dpr, ["#ffd23d", "#ff5c93", "#8b5cf6", "#2fbf68"], 24); say("Schutzschild! ⭐", bx, by - 100 * dpr, "#e0a000"); }
           else if (o.kind === "letter") {
             o.taken = o.done = true;
@@ -1924,7 +2071,7 @@ function startRunner() {
         }
       });
       if (!R.running) return;
-      R.objs = R.objs.filter(o => o.d + (o.len || 0) > -1 && !(o.taken && o.kind !== "train"));
+      R.objs = R.objs.filter(o => (o.kind === "ramp" ? o.d : o.d + (o.len || 0)) > -1 && !(o.taken && o.kind !== "train" && o.kind !== "ramp"));
       R.deco.forEach(o => o.d -= step); R.deco = R.deco.filter(o => o.d > -1);
       $("rBar").style.width = Math.max(0, R.time / 60 * 100) + "%";
       if (R.time <= 0) return end();
@@ -1932,12 +2079,16 @@ function startRunner() {
     ctx.save();
     if (R.shake > 0) ctx.translate((Math.random() - 0.5) * 14 * dpr, 0);
     drawScene(dt);
-    const draw = { train: drawTrain, hurdle: drawHurdle, letter: drawLetter, star: drawStar };
-    const all = R.deco.map(o => ({ d: o.d, f: () => drawDeco(o) })).concat(R.objs.map(o => ({ d: o.d, f: () => draw[o.kind](o) })));
+    box.classList.toggle("intro", R.intro > 0);
+    if (R.intro > 0) { drawIntro(); ctx.restore(); game.raf = requestAnimationFrame(frame); return; }
+    const draw = { train: drawTrain, hurdle: drawHurdle, letter: drawLetter, star: drawStar, ramp: drawRamp };
+    const key = o => o.kind === "ramp" ? o.d - o.len + 0.001 : o.kind === "train" && R.ground >= ROOF && PD >= o.d - 0.05 && PD <= o.d + o.len && Math.abs(o.lane - R.x) < 0.6 ? PD + 0.01 : o.d;
+    const all = R.deco.map(o => ({ d: o.d, f: () => drawDeco(o) })).concat(R.objs.map(o => ({ d: key(o), f: () => draw[o.kind](o) })));
     all.sort((a, b) => b.d - a.d);
     let birdDrawn = false;
     all.forEach(e => { if (!birdDrawn && e.d < PD) { drawBird(); birdDrawn = true; } e.f(); });
     if (!birdDrawn) drawBird();
+    drawChaser();
     drawFx(dt);
     ctx.restore();
     if (R.count > -0.4) drawCountdown();
@@ -2124,11 +2275,28 @@ function buySticker() {
 // ---------- Bildschirmzeit ----------
 const today = () => new Date().toISOString().slice(0, 10);
 function usedSec() { return state.usage[today()] || 0; }
+// Lustiger Stopp-Bildschirm: Foto (nur auf diesem Gerät gespeichert) mit Stoppschild und tunesischem „يزّي“
+const STOP_KEY = KEY + "-stop";
+let stopCfg = { img: "", text: "يزيييييييي!" };
+try { const s = JSON.parse(localStorage.getItem(STOP_KEY)); if (s) stopCfg = { ...stopCfg, ...s }; } catch (e) {}
+function saveStop() { try { localStorage.setItem(STOP_KEY, JSON.stringify(stopCfg)); return true; } catch (e) { return false; } }
+function boing() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime;
+  o.type = "triangle"; o.frequency.setValueAtTime(700, t0); o.frequency.exponentialRampToValueAtTime(140, t0 + 0.5);
+  g.gain.setValueAtTime(0.2, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.6); o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0 + 0.65); } catch (e) {} }
+function dressSleep() {
+  const mom = !!stopCfg.img;
+  $("momStop").hidden = !mom; $("sleepBird").toggleAttribute("hidden", mom);
+  if (mom) { $("momImg").src = stopCfg.img; $("momText").textContent = stopCfg.text || "يزيييييييي!"; }
+  $("sleepTitle").textContent = mom ? "Mama sagt: Stopp! 😄" : "Hudhud ist müde 😴";
+  $("sleepMsg").textContent = mom ? "Genug für heute! Du hast toll gelernt. Morgen geht es weiter. Jetzt ab nach draußen zum Spielen!" : "Für heute ist Schluss. Du hast toll gelernt! Morgen geht es weiter. Jetzt kannst du draußen spielen, malen oder mit Mama und Papa lesen.";
+}
+let stopPreview = false;
 function checkLimit() {
   const over = state.limit > 0 && usedSec() >= state.limit * 60;
-  if (over && $("sleepOverlay").hidden) { stopGame(); stopAudio(); try { speechSynthesis.cancel(); } catch (e) {} }
-  $("sleepOverlay").hidden = !over || !$("parentOverlay").hidden;
+  if (over && $("sleepOverlay").hidden && $("parentOverlay").hidden) { stopGame(); stopAudio(); try { speechSynthesis.cancel(); } catch (e) {} dressSleep(); boing(); if (!$("gameScreen").hidden) closeGame(); }
+  if (!stopPreview) $("sleepOverlay").hidden = !over || !$("parentOverlay").hidden;
 }
+$("sleepPreviewClose").onclick = () => { stopPreview = false; $("sleepPreviewClose").hidden = true; $("sleepParent").hidden = false; $("sleepOverlay").hidden = true; parentHome(); $("parentOverlay").hidden = false; };
 let sessionSec = 0;
 const anyOverlay = () => ["sleepOverlay", "parentOverlay", "breakOverlay", "welcomeOverlay"].some(id => !$(id).hidden);
 setInterval(() => {
@@ -2161,6 +2329,35 @@ $("welcomeForm").onsubmit = e => {
   hudhud(withName("Salām! Ich bin Hudhud. Los geht's!"));
 };
 
+// Foto für den Stopp-Bildschirm: auswählen, mit dem Finger verschieben, zoomen, als kleines JPEG speichern
+function setupStopEditor() {
+  const cv = $("stopCv"), c = cv.getContext("2d"), E = { img: null, z: 1, ox: 0, oy: 0 };
+  $("stopText").value = stopCfg.text || "يزيييييييي!";
+  const draw = () => {
+    c.fillStyle = "#e6f5ff"; c.fillRect(0, 0, 320, 320);
+    if (!E.img) { c.fillStyle = "#5b6a8c"; c.font = "600 22px sans-serif"; c.textAlign = "center"; c.fillText("Pas de photo", 160, 168); return; }
+    const s = Math.max(320 / E.img.width, 320 / E.img.height) * E.z, w = E.img.width * s, h = E.img.height * s;
+    E.ox = Math.min(0, Math.max(320 - w, E.ox)); E.oy = Math.min(0, Math.max(320 - h, E.oy));
+    c.drawImage(E.img, E.ox, E.oy, w, h);
+  };
+  const load = src => { const im = new Image(); im.onload = () => { E.img = im; E.z = 1; $("stopZoom").value = 1; const s = Math.max(320 / im.width, 320 / im.height); E.ox = (320 - im.width * s) / 2; E.oy = (320 - im.height * s) / 2; draw(); }; im.src = src; };
+  if (stopCfg.img) load(stopCfg.img); else draw();
+  $("stopFile").onchange = e => { const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => load(r.result); r.readAsDataURL(f); };
+  $("stopZoom").oninput = () => { const z0 = E.z; E.z = +$("stopZoom").value; E.ox = 160 - (160 - E.ox) * E.z / z0; E.oy = 160 - (160 - E.oy) * E.z / z0; draw(); };
+  let drag = null;
+  cv.onpointerdown = e => { drag = [e.clientX, e.clientY, E.ox, E.oy]; cv.setPointerCapture(e.pointerId); };
+  cv.onpointermove = e => { if (!drag) return; const k = 320 / cv.getBoundingClientRect().width; E.ox = drag[2] + (e.clientX - drag[0]) * k; E.oy = drag[3] + (e.clientY - drag[1]) * k; draw(); };
+  cv.onpointerup = cv.onpointercancel = () => { drag = null; };
+  $("stopSave").onclick = () => {
+    stopCfg.text = $("stopText").value.trim() || "يزيييييييي!";
+    if (E.img) { const o = document.createElement("canvas"); o.width = o.height = 400; const s = Math.max(320 / E.img.width, 320 / E.img.height) * E.z * 1.25;
+      o.getContext("2d").drawImage(E.img, E.ox * 1.25, E.oy * 1.25, E.img.width * s, E.img.height * s); stopCfg.img = o.toDataURL("image/jpeg", 0.85); }
+    $("stopMsg").textContent = saveStop() ? "Enregistré ✓" : "Impossible d'enregistrer sur cet appareil.";
+  };
+  $("stopRemove").onclick = () => { stopCfg.img = ""; E.img = null; saveStop(); draw(); $("stopMsg").textContent = "Photo retirée."; };
+  $("stopTry").onclick = () => { $("stopSave").onclick(); stopPreview = true; dressSleep(); $("parentOverlay").hidden = true; $("sleepParent").hidden = true; $("sleepPreviewClose").hidden = false; $("sleepOverlay").hidden = false; boing(); };
+}
+
 // ---------- Elternbereich (auf Französisch für die Eltern) ----------
 function openParent() {
   const a = 3 + Math.floor(Math.random() * 7), b = 4 + Math.floor(Math.random() * 6);
@@ -2180,6 +2377,17 @@ function parentHome() {
     <div class="limits" id="limits">${[10, 15, 20, 30, 45, 0].map(m => `<button class="soft" style="--c:var(--sea);--cs:var(--sea-soft)" aria-pressed="${state.limit === m}" data-m="${m}">${m ? m + " min" : "Sans limite"}</button>`).join("")}</div>
     <div class="row"><button class="soft" id="plus10">+10 min pour aujourd'hui</button><button class="soft" id="resetDay">Remettre le compteur du jour à zéro</button></div>
     <p class="note">Quand la limite est atteinte, Hudhud « s'endort » et l'application se bloque jusqu'au lendemain. Le temps n'est compté que quand l'application est ouverte à l'écran.</p>
+    <h3>Écran « stop » rigolo</h3>
+    <p class="note">Quand le temps est écoulé, l'application peut montrer une photo (par exemple maman) avec un panneau STOP et une bulle. La photo reste uniquement sur cet appareil : elle n'est jamais envoyée sur Internet ni dans le dépôt GitHub.</p>
+    <div class="photo-edit">
+      <canvas id="stopCv" width="320" height="320" aria-label="Aperçu de la photo, glisser pour la déplacer"></canvas>
+      <div style="display:grid;gap:8px;min-width:0">
+        <label class="soft" style="cursor:pointer;text-align:center">Choisir une photo<input type="file" id="stopFile" accept="image/*" hidden></label>
+        <label class="field" for="stopZoom">Zoom<input type="range" id="stopZoom" min="1" max="3" step="0.05" value="1"></label>
+        <label class="field" for="stopText">Texte de la bulle<input id="stopText" lang="ar" dir="rtl" style="font:inherit;font-size:1.1rem;padding:6px 10px;border:3px solid var(--line);border-radius:12px"></label>
+      </div>
+    </div>
+    <div class="row"><button class="soft" id="stopSave">Enregistrer</button><button class="soft" id="stopTry">Aperçu</button><button class="soft" id="stopRemove">Retirer la photo</button><span class="note" id="stopMsg"></span></div>
     <h3>Pause pour bouger</h3>
     <div class="limits" id="breaks">${[5, 10, 15, 0].map(m => `<button class="soft" style="--c:var(--sea);--cs:var(--sea-soft)" aria-pressed="${state.breakEvery === m}" data-m="${m}">${m ? "Toutes les " + m + " min" : "Jamais"}</button>`).join("")}</div>
     <p class="note">Hudhud propose 20 secondes de mouvement (battre des ailes, sauter). Bouger un peu aide à rester concentré.</p>
@@ -2212,6 +2420,7 @@ function parentHome() {
   $("parentClose").onclick = closeParent;
   $("breaks").querySelectorAll("button").forEach(b => b.onclick = () => { state.breakEvery = +b.dataset.m; save(); parentHome(); });
   $("rename").onclick = () => { $("parentOverlay").hidden = true; askName(); };
+  setupStopEditor();
   try { $("backup").value = "HUDHUD1:" + btoa(unescape(encodeURIComponent(JSON.stringify(state)))); } catch (e) {}
   $("copyBackup").onclick = () => { const v = $("backup").value; (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => { $("copyBackup").textContent = "Copié ✓"; }).catch(() => { $("backup").select(); }); };
   $("restore").onclick = () => {

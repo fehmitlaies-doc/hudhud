@@ -1,5 +1,5 @@
 // Hudhud offline: the app shell is cached on install; fonts and verse recitations are cached the first time they play.
-const SHELL = "hudhud-shell-v7";
+const SHELL = "hudhud-shell-v8";
 const MEDIA = "hudhud-media-v1";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png", "icon.svg"];
 
